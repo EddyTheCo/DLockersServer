@@ -1,0 +1,3 @@
+[submodule "binter"]
+	path = binter
+	url = git@github.com:EddyTheCo/binter.git
