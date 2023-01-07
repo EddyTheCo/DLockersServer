@@ -91,5 +91,5 @@ add_custom_command(
   TARGET server_main
   POST_BUILD
   COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/server_main.js ${CMAKE_CURRENT_BINARY_DIR}/server_main.wasm ${CMAKE_CURRENT_BINARY_DIR}/qtloader.js ${CMAKE_CURRENT_SOURCE_DIR}/wasm
+  ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/server_main.js ${CMAKE_CURRENT_BINARY_DIR}/server_main.wasm ${CMAKE_CURRENT_BINARY_DIR}/qtloader.js ${CMAKE_CURRENT_BINARY_DIR}/server_main.worker.js ${CMAKE_CURRENT_SOURCE_DIR}/wasm
   )
