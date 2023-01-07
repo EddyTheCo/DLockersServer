@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<link href='https://fonts.googleapis.com/css?family=Allerta Stencil' rel='stylesheet'>
+		<link rel="stylesheet" href="style.css">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+		<title>QML online</title>
+	</head>
+	<body onload="init();">
+		<div class="pair">
+			<div class="codeArea">
+				<div id="editor" >
+				</div>
+			</div>
+			<div class="playArea" >
+				<figure id="qtspinner">
+					<center >
+						<img id="logo" src="img/qtlogo.svg" ></img>
+						<div id="qtstatus"></div>
+					</center>
+				</figure>
+				<canvas id="qtcanvas" oncontextmenu="event.preventDefault()" contenteditable="true"></canvas>
+				<script type='text/javascript'>
+					function init() {
+											var spinner = document.querySelector('#qtspinner');
+											var canvas = document.querySelector('#qtcanvas');
+											var status = document.querySelector('#qtstatus')
+
+											var qtLoader = QtLoader({
+																	canvasElements : [canvas],
+																	showLoader: function(loaderStatus) {
+																							spinner.style.display = 'block';
+																							canvas.style.display = 'none';
+																							status.innerHTML = loaderStatus + "...";
+																						},
+																	showError: function(errorText) {
+																							status.innerHTML = errorText;
+																							spinner.style.display = 'block';
+																							canvas.style.display = 'none';
+																						},
+																	showExit: function() {
+																							status.innerHTML = "Application exit";
+																							if (qtLoader.exitCode !== undefined)
+																								status.innerHTML += " with code " + qtLoader.exitCode;
+																							if (qtLoader.exitText !== undefined)
+																								status.innerHTML += " (" + qtLoader.exitText + ")";
+																							spinner.style.display = 'block';
+																							canvas.style.display = 'none';
+																						},
+																	showCanvas: function() {
+																							spinner.style.display = 'none';
+																							canvas.style.display = 'block';
+																						},
+																});
+											qtLoader.loadEmscriptenModule("server_main");
+										}
+				</script>
+				<script type="text/javascript" src="qtloader.js"></script>
+			</div>
+		</div>
+		<footer>
+			<div class="fcont">
+				<div class="fdiv" >
+					Developed by <a href="https://eddytheco.github.io/" target="_blank" > Eddy</a>
+				</div>
+					<div class="fdiv">
+						<div class="fdivsub">
+							<div class="ffdiv">
+								<span>Powered by</span>
+							</div>
+							<div class="ffdiv">
+								<a href="https://github.com/" target="_blank"><img id="gitHublogo" src="img/gitHublogo.png"></img></a>
+							</div>
+							<div class="ffdiv">
+								<a href="https://www.qt.io/" target="_blank"><img id="qtlogo" src="img/qtlogo.svg"></img></a>
+							</div>
+						</div>
+					</div>
+			</div>
+		</footer>
+	</body>
+</html>
