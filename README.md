@@ -32,4 +32,4 @@ The server allows you to open the locker if it has a booking at that time and yo
 For the propose of this proof of concept  the  pin is a number of 5 digits but in real applications the pin should be a
 large string.
 
-:warning: This has only be tested on the Firefox browser
+**This has only be tested on the Firefox browser**

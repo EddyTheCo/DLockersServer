@@ -39,6 +39,7 @@ a{
 	margin:1%;
 	font-family: 'Ubuntu Condensed';
 	font-size: 1.3vw;
+	overflow-y:scroll;
 }
 canvas {
 	border: 0px none;
