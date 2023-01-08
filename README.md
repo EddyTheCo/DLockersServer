@@ -1,7 +1,7 @@
 # [DLockers  Server](https://eddytheco.github.io/DLockersServer/wasm/)
 
 
-## Proof of Concept on implementing decentralized applications on the IOTA network.
+## Proof of Concept on implementing decentralized applications on the [IOTA](https://www.iota.org/) network.
 
 This application can be seen as a decentralized server that allows you to book a locker by paying with Shimmer.
 The application is set to use the [Shimmer Testnet](https://explorer.shimmer.network/testnet/)
@@ -31,3 +31,5 @@ If everything is fine the server collect the money from the client and update it
 The server allows you to open the locker if it has a booking at that time and you entered a correct pin.
 For the propose of this proof of concept  the  pin is a number of 5 digits but in real applications the pin should be a
 large string.
+
+:warning: This has only be tested on the Firefox browser
