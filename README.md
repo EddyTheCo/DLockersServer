@@ -1,10 +1,10 @@
 # [DLockers  Server](https://eddytheco.github.io/DLockersServer/wasm/)
 
 
-## Proof of Concept on implementing decentralized applications on the [IOTA](https://www.iota.org/) network.
+## Proof of Concept on implementing decentralized applications on the IOTA network.
 
 This application can be seen as a decentralized server that allows you to book a locker by paying with Shimmer.
-The application is set to use the [Shimmer Testnet](https://explorer.shimmer.network/testnet/)
+The application is set to use the Shimmer Testnet
 and custom libraries developed by me.
 For sending a block to the network the application needs to perform Proof of Work.
 My implementation of proof of work it is not optimized and this will take much time on the browser, please be patient 
@@ -16,7 +16,7 @@ The communication between server and client relies on creating outputs on the le
 Because of that, the server needs an initial amount of funds to be able to publish its state on the ledger. 
 These initial funds are always own by the server. This proof of concept uses a random seed for the address
 creation(if reload the page the server loses its funds).
-* *For transferring funds to the server one can use a wallet like [firefly](https://firefly.iota.org/).*
+
 
 
 From now, one can connect different clients to the same server but not different server to the same client.
