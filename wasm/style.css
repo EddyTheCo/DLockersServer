@@ -20,7 +20,16 @@ a{
 	background-color: #10141c;
 	color: white;
 }
-
+#qtspinner
+{
+	position:fixed;
+	width:50%;
+	height:50%;
+	bottom: 25%;
+	right: 25%; 
+	display:block;
+	z-index: 1000
+}
 .codeArea {
 	width: 100%;
 	height:0%;
@@ -33,25 +42,14 @@ a{
 	float: left;
 }
 #editor {
-	width: 98%;
+	width: 100%;
 	height: 100%;
 	float: left;
-	margin:1%;
 	font-family: 'Ubuntu Condensed';
 	font-size: 1.3vw;
 	overflow-y:scroll;
 }
-canvas {
-	border: 0px none;
-	background-color: transparent;
-	width:100%;
-	height:100%;
-	display: none;
-	outline: 0px solid transparent;
-	caret-color: transparent;
-	cursor:default
-
-}
+#screen { width: 100%; height: 100%; }
 figure
 {
 	width:100%;
@@ -75,7 +73,7 @@ footer
 {
 	float:left;
 	width:100%;
-	height:10%;
+	height:5%;
 	background-color: #10141c;
 	font-size: 2vw;
 }
@@ -90,6 +88,17 @@ footer
 	align-items: stretch;
 	flex-direction: column;
 }
+.splitter {
+    display: flex;
+}
+.splitter > .gutter {
+    background-color: #10141c;
+    border: 0px;
+}
+
+.splitter > .gutter::before {
+    background-color: #0f79af;
+}
 @media screen and (min-width: 700px) {
 	.pair
 	{
@@ -97,11 +106,11 @@ footer
 	}
 
 	.codeArea {
-		width: 65%;
+		width: 70%;
 		height: 100%;
 	}
 	.playArea {
-		width: 35%;
+		width: 30%;
 		height: 100%;
 	}
 	footer

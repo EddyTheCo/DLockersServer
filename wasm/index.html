@@ -1,86 +1,43 @@
 <!doctype html>
 <html lang="en-us">
+
 	<head>
 		<meta charset="utf-8">
-		<script src="coi-serviceworker.js"></script>
 		<link href='https://fonts.googleapis.com/css?family=Allerta Stencil' rel='stylesheet'>
 		<link href='https://fonts.googleapis.com/css?family=Ubuntu Condensed' rel='stylesheet'>
-		<link rel="stylesheet" href="style.css">
+		<script type="text/javascript" src="qtloader.js"></script>
+		<script type="text/javascript" src="js/initQTwasm.js"></script>
+		<script type="text/javascript" src="js/scripts.js"></script>
 		<script type="module" src="https://md-block.verou.me/md-block.js"></script>
+		<link rel="stylesheet" href="https://cdn.korzh.com/metroui/v4.5.1/css/metro-all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+		<script src="https://cdn.korzh.com/metroui/v4.5.1/js/metro.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+		<link rel="stylesheet" href="style.css">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 		<title>DLockers Server</title>
 	</head>
-	<body onload="init();LoadFile('https://raw.githubusercontent.com/EddyTheCo/DLockersServer/main/README.md');">
-		<div class="pair">
-			<div class="codeArea">
-				<div id="editor" >
-					<md-block id="md" >
-				       </md-block>
+
+	<body onload="init();LoadFile('https://eddytheco.github.io/DLockersServer/README.md');">
+		<div class="pair" data-role="splitter" data-on-resize-split="resizeSplitX" class="h-100" >
+			<div class="codeArea d-flex flex-justify-center flex-align-center">
+				<div id="editor" style="margin:0px;">
+					<md-block id="md">
+						       </md-block>
 				</div>
 			</div>
-			<div class="playArea" >
-				<figure id="qtspinner">
-					<center >
-						<img id="logo" src="img/qtlogo.svg" ></img>
-						<div id="qtstatus"></div>
-					</center>
-				</figure>
-				<canvas id="qtcanvas" oncontextmenu="event.preventDefault()" contenteditable="true"></canvas>
-				<script type='text/javascript'>
-					function init() {
-											var spinner = document.querySelector('#qtspinner');
-											var canvas = document.querySelector('#qtcanvas');
-											var status = document.querySelector('#qtstatus')
-
-											var qtLoader = QtLoader({
-																	canvasElements : [canvas],
-																	showLoader: function(loaderStatus) {
-																							spinner.style.display = 'block';
-																							canvas.style.display = 'none';
-																							status.innerHTML = loaderStatus + "...";
-																						},
-																	showError: function(errorText) {
-																							status.innerHTML = errorText;
-																							spinner.style.display = 'block';
-																							canvas.style.display = 'none';
-																						},
-																	showExit: function() {
-																							status.innerHTML = "Application exit";
-																							if (qtLoader.exitCode !== undefined)
-																								status.innerHTML += " with code " + qtLoader.exitCode;
-																							if (qtLoader.exitText !== undefined)
-																								status.innerHTML += " (" + qtLoader.exitText + ")";
-																							spinner.style.display = 'block';
-																							canvas.style.display = 'none';
-																						},
-																	showCanvas: function() {
-																							spinner.style.display = 'none';
-																							canvas.style.display = 'block';
-																						},
-																});
-											qtLoader.loadEmscriptenModule("server_main");
-										}
-					function LoadFile(readme) {
-					console.log(readme);
-					axios.get(readme).then(function (response) {
-					console.log(response.data);
-					document.querySelector('#md').mdContent= response.data;
-					}).catch(function (error) {
-					console.log(error);																	});
-					}
-				</script>
-				<script type="text/javascript" src="qtloader.js"></script>
+			<div class="playArea d-flex flex-justify-center flex-align-center" id="qtrootDiv">
 			</div>
 		</div>
 		<footer>
-			<div class="fdiv" style="text-align:center;" >
+			<div class="fdiv" id="gitrepo" style="text-align:center;">
 				<a style="display: contents; width:30px;" href="https://github.com/EddyTheCo/DLockersServer" target="_blank"><img style="width:30px;" id="gitHublogo" src="img/gitHublogo.png"></img></a>
-				Developed by <a href="https://eddytheco.github.io/" target="_blank" > Eddy</a>
+				Developed by <a href="https://eddytheco.github.io/" target="_blank">Eddy</a>
 			</div>
 		</footer>
 	</body>
+
 </html>
