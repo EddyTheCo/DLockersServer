@@ -5,45 +5,40 @@ include(local_conf.cmake OPTIONAL)
 project(DLockers VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
-qt_standard_project_setup()
+find_package(Qt6 COMPONENTS Core)
+find_package(Qt6 COMPONENTS Gui)
+find_package(Qt6 COMPONENTS Quick)
+find_package(Qt6 COMPONENTS Qml)
+
 
 qt_add_executable(server_main server_main.cpp)
+
+
 qt6_add_qml_module(server_main
-	URI binter 
+	URI server
 	VERSION 1.0
 	SOURCES
-	binter/src/Hour_model.cpp binter/src/Day_model.cpp  binter/include/Day_model.hpp binter/include/Hour_model.hpp
-	binter/src/bclient.cpp binter/src/bserver.cpp  binter/include/bserver.hpp binter/include/bclient.hpp
+	src/bserver.cpp  include/bserver.hpp
 	QML_FILES
-	binter/qml/Check_Open_Window.qml
-	binter/qml/Enter_Pin_server.qml
-	binter/qml/Enter_Pin_client.qml
-	binter/qml/Pin_box.qml
-	binter/qml/Main_view_server.qml
-	binter/qml/window_server.qml
-	binter/qml/CButton.qml
-	binter/qml/Day_swipe_view.qml
-	binter/qml/Dia_delegate.qml
-	binter/qml/Horario_delegate.qml
-	binter/qml/Horario_list_view.qml
-	binter/qml/Main_view_client.qml
-	binter/qml/window_client.qml
-	binter/qml/Logo.qml
-	binter/qml/Init_popup_server.qml
-	binter/qml/Init_popup_client.qml
-	binter/qml/Address_qr.qml
-	binter/qml/Pay_popup.qml
-	binter/qml/Book_popup.qml
+	qml/window.qml
+	qml/Enter_Pin_server.qml
+	qml/Head.qml
+        RESOURCE_PREFIX
+         "/esterVtech.com/imports"
+        IMPORTS MyDesigns nodeConection account booking_model
+	IMPORT_PATH
+        ${CMAKE_BINARY_DIR}/_deps/mydesigns-build
+	${CMAKE_BINARY_DIR}/_deps/nodeconection-build
+	${CMAKE_BINARY_DIR}/_deps/account-build
+        ${CMAKE_BINARY_DIR}/_deps/booking_model-build
 	)
-target_compile_options(server_main PRIVATE -pthread)
-target_link_options(server_main PRIVATE -pthread -sPTHREAD_POOL_SIZE=8)
-target_link_libraries(server_main PRIVATE Qt6::Gui Qt6::Quick QtQrGen )
 
-target_include_directories(server_main PUBLIC binter/include)
+
+target_link_libraries(server_main PRIVATE Qt::Core Qt::Gui Qt::Qml Qt::Quick)
+
+target_include_directories(server_main PUBLIC include)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -53,43 +48,35 @@ FetchContent_Declare(
 	)
 FetchContent_MakeAvailable(qrCode)
 
-include(FetchContent)
 FetchContent_Declare(
-	qclient
-	GIT_REPOSITORY git@github.com:EddyTheCo/Qclient-IOTA.git
+        booking_model
+        GIT_REPOSITORY git@github.com:EddyTheCo/Booking_model.git
 	GIT_TAG main
 	)
-FetchContent_MakeAvailable(qclient)
-FetchContent_Declare(
-	qclientMQTT
-	GIT_REPOSITORY git@github.com:EddyTheCo/QclientMqtt-IOTA.git
-	GIT_TAG main
-	)
-FetchContent_MakeAvailable(qclientMQTT)
+FetchContent_MakeAvailable(booking_model)
 
 FetchContent_Declare(
-        booking
-        GIT_REPOSITORY git@github.com:EddyTheCo/booking.git
-        GIT_TAG main
-        )
-FetchContent_MakeAvailable(booking)
+        nodeConection
+        GIT_REPOSITORY git@github.com:EddyTheCo/ConectionSettings.git
+	GIT_TAG main
+	)
+FetchContent_MakeAvailable(nodeConection)
 
 FetchContent_Declare(
         account
         GIT_REPOSITORY git@github.com:EddyTheCo/account.git
-        GIT_TAG main
-        )
+	GIT_TAG main
+	)
 FetchContent_MakeAvailable(account)
 
-
-target_link_libraries(server_main PRIVATE  qclient qclientMQTT  booking  account)
-
+target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen)
 target_compile_definitions(server_main
 	PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
-
+if(EMSCRIPTEN)
 add_custom_command(
-  TARGET server_main
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND}
-  ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/server_main.js ${CMAKE_CURRENT_BINARY_DIR}/server_main.wasm ${CMAKE_CURRENT_BINARY_DIR}/qtloader.js ${CMAKE_CURRENT_BINARY_DIR}/server_main.worker.js ${CMAKE_CURRENT_SOURCE_DIR}/wasm
-  )
+	TARGET server_main
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E copy ${CMAKE_CURRENT_BINARY_DIR}/server_main.js ${CMAKE_CURRENT_BINARY_DIR}/server_main.wasm ${CMAKE_CURRENT_BINARY_DIR}/qtloader.js  ${CMAKE_CURRENT_SOURCE_DIR}/wasm
+	)
+endif()
