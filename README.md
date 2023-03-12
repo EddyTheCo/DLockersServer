@@ -4,7 +4,6 @@
 ## Proof of Concept on implementing decentralized applications on the IOTA network.
 
 This application can be seen as a decentralized server that allows you to book a locker by paying with Shimmer.
-The application is set to use the Shimmer Testnet and custom libraries developed by me.
 In order to use the application one needs to set the address of the node to connect.
 The Proof of Work has to be performed by the node (by setting the JWT for protected routes, by enabling PoW in the node...).
 In principle it will also work for the shimmer mainnet by setting the node to a mainnet one(I have not tried).
@@ -37,7 +36,7 @@ large string.
 
 * Any person can start renting physical space for lockers.
 * You do not depend on centralize company servers to store your business data or to process payments.
-* As longer as you maintain a node(blockchain), you gainings  and business data are cryptographically secured. 
+* As longer as you maintain a node(blockchain), your gainings  and business data are cryptographically secured. 
 * The code is open source and grant you certain rights and responsibilities to respect other people rights.
 
 
