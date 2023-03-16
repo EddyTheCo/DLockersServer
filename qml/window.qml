@@ -25,12 +25,12 @@ ApplicationWindow {
             Book_Server.restart();
         }
     }
-Connections {
-          target: Book_Server
-          function onGot_new_booking(boo) {
-              Day_model.add_booking(boo,false);
-          }
-      }  
+    Connections {
+        target: Book_Server
+        function onGot_new_booking(boo) {
+            Day_model.add_booking(boo,false);
+        }
+    }
 
     Popup {
         id:settings
@@ -119,69 +119,61 @@ Connections {
     }
 
 
-    StackView {
-        id: stack_
-        initialItem: initial
-        anchors.fill: parent
-    }
 
-    Component
+
+
+
+    ColumnLayout
     {
-        id:initial
-
-        ColumnLayout
+        id:column
+        anchors.fill: parent
+        spacing: 0
+        Head
         {
-            id:column
+            id:head
+            property bool init:true
+            Layout.maximumHeight: 300
+            Layout.minimumHeight: 100
+            Layout.fillHeight:  true
+            Layout.minimumWidth: 300
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignCenter
+            butt.text:(init)?"Open box":"back"
+            butt.enabled:Node_Conection.state&&!Book_Server.transfer_funds
 
-            spacing: 0
-            Head
+            butt.onClicked:
             {
-                id:head
-                Layout.maximumHeight: 300
-                Layout.minimumHeight: 100
-                Layout.fillHeight:  true
-                Layout.minimumWidth: 300
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignTop
-                butt.text:"Open box"
-                butt.enabled:Node_Conection.state&&!Book_Server.transfer_funds
-
-                butt.onClicked:
-                {
-                    var component = Qt.createComponent("Enter_Pin_server.qml");
-                    if (component.status === Component.Ready) {
-                        var next = component.createObject(column, {stack:stack_,headh:head.height});
-                        if (next === null) {
-                            console.log("Error creating object");
-                        }
-                    } else if (component.status === Component.Error) {
-                        console.log("Error loading component:", component.errorString());
-                    }
-                    stack_.push(next)
-                }
+                head.init=!head.init
             }
+        }
 
-            Rectangle
+        Rectangle
+        {
+            id:bott
+            color:"#0f171e"
+            Layout.minimumHeight: 300
+            Layout.preferredHeight: 400
+            Layout.fillHeight:  true
+            Layout.minimumWidth: 200
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignCenter
+            Day_swipe_view {
+                id: dayview
+                clip:true
+                can_book:false
+                anchors.fill:parent
+                visible:head.init
+            }
+            Enter_Pin_server
             {
-                id:bott
-                color:"#0f171e"
-                Layout.minimumHeight: 500
-                Layout.fillHeight:  true
-                Layout.minimumWidth: 300
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignTop
-                Day_swipe_view {
-                    id: dayview
-                    clip:true
-                    can_book:false
-                    anchors.fill:parent
-
-                }
+                visible:!head.init
+                anchors.fill:parent
             }
-
         }
 
     }
+
+
 
 
 }
