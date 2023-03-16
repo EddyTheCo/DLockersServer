@@ -8,8 +8,7 @@ import MyDesigns
 ColumnLayout
 {
     id: ep
-    required property  StackView stack
-    required property int headh
+
     spacing:0
     Popup {
         id:result
@@ -46,77 +45,60 @@ ColumnLayout
         }
 
     }
-    Head
+    MyLabel
     {
-        id:head
-        Layout.preferredHeight:ep.headh
-        Layout.maximumHeight: ep.headh
-        Layout.minimumHeight: 100
+        text: qsTr("Enter pin")
+        Layout.alignment: Qt.AlignCenter
+        font.pointSize: 16
+    }
+
+    TextInput {
+        id:numbers_
+        Layout.maximumHeight: 200
         Layout.fillHeight:  true
-        Layout.minimumWidth: 300
+        Layout.maximumWidth: 300
         Layout.fillWidth: true
-        Layout.alignment: Qt.AlignTop
-        butt.text:"Back"
-        butt.onClicked:ep.stack.pop()
+        Layout.alignment: Qt.AlignCenter
+        font.letterSpacing :20
+        font.pointSize: 28
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        color:"white"
+        inputMask: "99999"
+        text: "12345"
     }
 
 
-    Rectangle
+    MyButton
     {
-        id:center_
-        color:"#0f171e"
-        Layout.fillHeight:  true
-        Layout.minimumWidth: 300
+        Layout.maximumWidth: 150
+        Layout.maximumHeight: 50
         Layout.fillWidth: true
-        Layout.alignment: Qt.AlignTop
-
-        ColumnLayout
+        Layout.fillHeight: true
+        Layout.alignment: Qt.AlignCenter
+        text: "Open"
+        onClicked:
         {
-            spacing:20
-            anchors.fill: parent
-            MyPinBox
+
+            if(Book_Server.try_to_open(numbers_.text))
             {
-                id:pin_box_
-
-                Layout.maximumHeight: 200
-                Layout.fillHeight:  true
-                Layout.maximumWidth: 300
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignCenter
-
-                description:qsTr("Enter pin:")
+                result.description=qsTr("The box is opened")
+                result.visible=true;
             }
-            MyButton
+            else
             {
-                Layout.maximumWidth: 150
-                Layout.maximumHeight: 50
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.alignment: Qt.AlignCenter
-                text: "Open"
-                onClicked:
-                {
-                    var component;
-                    var next
-                    if(Book_Server.try_to_open(pin_box_.pin.text))
-                    {
-                        result.description=qsTr("The box is opened")
-                        result.visible=true;
-                    }
-                    else
-                    {
-                        result.description=qsTr("Nice try but no")
-                        result.visible=true;
-                    }
-                }
+                result.description=qsTr("Nice try but no")
+                result.visible=true;
             }
-
-
         }
-
-
     }
-
 
 
 }
+
+
+
+
+
+
+
