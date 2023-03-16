@@ -129,7 +129,7 @@ void Book_Server::init_min_amount_funds(void)
         connect(this,&Book_Server::stateChanged,reciever,[=](){
             if(state_==Ready)
             {
-                while (!queue.empty()) {
+                while (!queue.empty()&&state_==Ready) {
                     handle_new_book(queue.front());
                     queue.pop();
                 }
