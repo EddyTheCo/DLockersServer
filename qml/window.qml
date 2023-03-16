@@ -25,6 +25,12 @@ ApplicationWindow {
             Book_Server.restart();
         }
     }
+Connections {
+          target: Book_Server
+          function onGot_new_booking(boo) {
+              Day_model.add_booking(boo,false);
+          }
+      }  
 
     Popup {
         id:settings
@@ -83,7 +89,6 @@ ApplicationWindow {
                 }
             }
         }
-
     }
     MyPayPopUp
     {
@@ -127,9 +132,7 @@ ApplicationWindow {
         ColumnLayout
         {
             id:column
-            Day_model{
-                id:day_model
-            }
+
             spacing: 0
             Head
             {
@@ -141,7 +144,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 butt.text:"Open box"
-                butt.enabled:Node_Conection.state
+                butt.enabled:Node_Conection.state&&!Book_Server.transfer_funds
 
                 butt.onClicked:
                 {
@@ -171,7 +174,6 @@ ApplicationWindow {
                     id: dayview
                     clip:true
                     can_book:false
-                    day_model: day_model
                     anchors.fill:parent
 
                 }
