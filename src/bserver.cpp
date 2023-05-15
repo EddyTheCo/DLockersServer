@@ -275,61 +275,76 @@ void Book_Server::handle_new_book(Node_output node_out)
 
                     auto new_book=Booking::get_new_booking_from_metadata(metadata);
                     const auto now=QDateTime::currentDateTime().toSecsSinceEpoch();
-                    if(new_book["finish"].toInteger()>=now)
+                    const auto sendfeature=basic_output_->get_feature_(Feature::Sender_typ);
+                    if(sendfeature)
                     {
+                        auto sender=std::static_pointer_cast<const Sender_Feature>(sendfeature)->sender();
 
-                        auto output=std::vector<Node_output>{node_out};
-                        auto payment_bundle=Account::get_addr({0,0,1});
-                        payment_bundle.consume_outputs({output});
-
-                        if(payment_bundle.amount>=new_book.calculate_price(price_per_hour_))
+                        if(!new_book.isEmpty()&&new_book["finish"].toInteger()>=now)
                         {
-                            auto pair=books_.insert(new_book);
-                            if(pair.second)
+
+                            auto output=std::vector<Node_output>{node_out};
+                            auto payment_bundle=Account::get_addr({0,0,1});
+                            payment_bundle.consume_outputs({output});
+
+
+                            const auto eddAddr=Account::get_addr({0,0,0}).get_address();
+                            const auto issuerFea=Feature::Issuer(eddAddr);
+
+                            auto addUnlcon=Unlock_Condition::Address(sender);
+                            auto nftmetadata=Booking::create_new_bookings_metadata(new_book);
+                            auto metFea=Feature::Metadata(nftmetadata);
+                            auto NftOut= Output::NFT(0,{addUnlcon},{},{issuerFea,metFea});
+                            NftOut->amount_=Client::get_deposit(NftOut,info);
+
+                            if(payment_bundle.amount>=new_book.calculate_price(price_per_hour_)+NftOut->amount_)
                             {
+                                auto pair=books_.insert(new_book);
+                                if(pair.second)
+                                {
+
+                                    auto publish_bundle=Account::get_addr({0,0,0});
+                                    publish_bundle.consume_outputs(publish_node_outputs_->outs_);
+
+                                    auto Inputs_Commitment=Block::get_inputs_Commitment(payment_bundle.Inputs_hash+publish_bundle.Inputs_hash);
+
+                                    const auto pubOut=get_publish_output(publish_bundle.amount+payment_bundle.amount-NftOut->amount_);
+                                    pvector<const Output> the_outputs_{pubOut,NftOut};
+                                    the_outputs_.insert( the_outputs_.end(), publish_bundle.ret_outputs.begin(), publish_bundle.ret_outputs.end());
+                                    the_outputs_.insert( the_outputs_.end(), payment_bundle.ret_outputs.begin(), payment_bundle.ret_outputs.end());
+
+                                    pvector<const Input> the_inputs_=payment_bundle.inputs;
+                                    the_inputs_.insert( the_inputs_.end(), publish_bundle.inputs.begin(), publish_bundle.inputs.end());
+
+                                    auto essence=Essence::Transaction(info->network_id_,the_inputs_,Inputs_Commitment,the_outputs_);
+
+                                    payment_bundle.create_unlocks(essence->get_hash());
+                                    publish_bundle.create_unlocks(essence->get_hash());
+
+                                    pvector<const Unlock> the_unlocks_=payment_bundle.unlocks;
+                                    the_unlocks_.insert( the_unlocks_.end(), publish_bundle.unlocks.begin(), publish_bundle.unlocks.end());
 
 
-                                auto publish_bundle=Account::get_addr({0,0,0});
-                                publish_bundle.consume_outputs(publish_node_outputs_->outs_);
+                                    auto trpay=Payload::Transaction(essence,the_unlocks_);
 
-                                auto Inputs_Commitment=Block::get_inputs_Commitment(payment_bundle.Inputs_hash+publish_bundle.Inputs_hash);
+                                    auto resp=Node_Conection::mqtt_client->get_subscription("transactions/"+trpay->get_id().toHexString() +"/included-block");
+                                    connect(resp,&ResponseMqtt::returned,this,[=](auto var){
+                                        set_state(Ready);
+                                        resp->deleteLater();
+                                    });
+                                    payments_.push_back(info->amount_json(payment_bundle.amount));
+                                    emit paymentsChange();
+                                    auto block_=Block(trpay);
 
+                                    Node_Conection::rest_client->send_block(block_);
+                                    emit got_new_booking(new_book);
+                                    clean_state();
+                                }
 
-                                const auto pubOut=get_publish_output(publish_bundle.amount+payment_bundle.amount);
-                                pvector<const Output> the_outputs_{pubOut};
-                                the_outputs_.insert( the_outputs_.end(), publish_bundle.ret_outputs.begin(), publish_bundle.ret_outputs.end());
-                                the_outputs_.insert( the_outputs_.end(), payment_bundle.ret_outputs.begin(), payment_bundle.ret_outputs.end());
-
-                                pvector<const Input> the_inputs_=payment_bundle.inputs;
-                                the_inputs_.insert( the_inputs_.end(), publish_bundle.inputs.begin(), publish_bundle.inputs.end());
-
-                                auto essence=Essence::Transaction(info->network_id_,the_inputs_,Inputs_Commitment,the_outputs_);
-
-                                payment_bundle.create_unlocks(essence->get_hash());
-                                publish_bundle.create_unlocks(essence->get_hash());
-
-                                pvector<const Unlock> the_unlocks_=payment_bundle.unlocks;
-                                the_unlocks_.insert( the_unlocks_.end(), publish_bundle.unlocks.begin(), publish_bundle.unlocks.end());
-
-
-                                auto trpay=Payload::Transaction(essence,the_unlocks_);
-
-                                auto resp=Node_Conection::mqtt_client->get_subscription("transactions/"+trpay->get_id().toHexString() +"/included-block");
-                                connect(resp,&ResponseMqtt::returned,this,[=](auto var){
-                                    set_state(Ready);
-                                    resp->deleteLater();
-                                });
-                                payments_.push_back(info->amount_json(payment_bundle.amount));
-                                emit paymentsChange();
-                                auto block_=Block(trpay);
-
-                                Node_Conection::rest_client->send_block(block_);
-                                emit got_new_booking(new_book);
-                                clean_state();
                             }
-
                         }
                     }
+
 
                 }
 
