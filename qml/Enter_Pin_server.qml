@@ -5,96 +5,70 @@ import QtQuick.Controls
 import MyDesigns
 
 
+
 ColumnLayout
 {
-    id: ep
 
-    spacing:0
-    Popup {
-        id:result
-        anchors.centerIn: Overlay.overlay
-        visible:false
-        closePolicy: Popup.CloseOnPressOutside
-        property alias description:label.text;
-        background:Rectangle
-        {
-            color:"#0f171e"
-            border.width: 1
-            border.color: "white"
-            radius:8
+    Connections {
+        target: Book_Server
+        function onNftAddress(addr) {
+            nftaddr.address=addr;
         }
-        ColumnLayout
-        {
-            anchors.fill:parent
-            MyLabel
-            {
-                id:label
-                Layout.maximumHeight: 200
-                Layout.fillHeight:  true
-                Layout.maximumWidth: 300
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignCenter
-                Layout.preferredWidth: 300
-                Layout.preferredHeight: 200
-                font.pointSize:20
-                wrapMode:Text.WrapAnywhere
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-
-        }
-
     }
+
     MyLabel
     {
-        text: qsTr("Enter pin")
-        Layout.alignment: Qt.AlignCenter
-        font.pointSize: 16
-    }
 
-    TextInput {
-        id:numbers_
-        Layout.maximumHeight: 200
-        Layout.fillHeight:  true
-        Layout.maximumWidth: 300
         Layout.fillWidth: true
-        Layout.alignment: Qt.AlignCenter
-        font.letterSpacing :20
-        font.pointSize: 28
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        color:"white"
-        inputMask: "99999"
-        text: "12345"
+        text:qsTr("Send the nft to:")
+        font:CustomStyle.h2
+        color:CustomStyle.midColor1
+        horizontalAlignment:Text.AlignLeft
+        fontSizeMode:Text.Fit
+        Layout.alignment: Qt.AlignTop
     }
-
-
-    MyButton
+    TextAddress
     {
-        Layout.maximumWidth: 150
-        Layout.maximumHeight: 50
+        id:nftaddr
         Layout.fillWidth: true
-        Layout.fillHeight: true
-        Layout.alignment: Qt.AlignCenter
-        text: "Open"
-        onClicked:
+        description:"address"
+        address:""
+        Layout.alignment: Qt.AlignTop
+        Layout.bottomMargin: 10
+    }
+    Rectangle
+    {
+        color:CustomStyle.backColor2
+        Layout.fillHeight:  true
+        border.width:2
+        border.color:CustomStyle.midColor1
+        Layout.fillWidth: true
+        Layout.maximumWidth: parent.width*0.8
+        Layout.minimumHeight: 50
+        Layout.maximumHeight: 200
+        radius:Math.min(width,height)*0.07
+        Layout.alignment: Qt.AlignHCenter|Qt.AlignBottom
+        Layout.margins: 30
+        MyLabel
         {
-
-            if(Book_Server.try_to_open(numbers_.text))
-            {
-                result.description=qsTr("The box is opened")
-                result.visible=true;
-            }
-            else
-            {
-                result.description=qsTr("Nice try but no")
-                result.visible=true;
-            }
+            anchors.centerIn: parent
+            width: parent.width*0.85
+            height:parent.height
+            text:qsTr("The box is " + (Book_Server.open?"open":"closed"))
+            font:CustomStyle.h1
+            color:(Book_Server.open)?CustomStyle.frontColor1:CustomStyle.midColor1
+            horizontalAlignment:Text.AlignHCenter
+            verticalAlignment:Text.AlignVCenter
+            fontSizeMode:Text.Fit
         }
     }
+
+
 
 
 }
+
+
 
 
 

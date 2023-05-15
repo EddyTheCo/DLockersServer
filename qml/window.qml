@@ -8,20 +8,36 @@ import booking_model
 import MyDesigns
 
 ApplicationWindow {
-    id:mv
+    id:window
     visible: true
+    background: Rectangle
+    {
+        color:CustomStyle.backColor1
+    }
 
 
-
+    Notification
+    {
+        id:noti
+        width:300
+        height:100
+        x:(window.width-width)*0.5
+        y: window.height*(1-0.05)-height
+    }
     Connections {
         target: Node_Conection
         function onStateChanged() {
+            if(Node_Conection.state==Node_Conection.Connected)
+            {
+                noti.show({"message":"Conected to "+ Node_Conection.nodeaddr });
+            }
             Book_Server.restart();
         }
     }
     Connections {
         target: Account
         function onSeedChanged() {
+
             Book_Server.restart();
         }
     }
@@ -32,96 +48,110 @@ ApplicationWindow {
         }
     }
 
-    Popup {
+    Drawer {
         id:settings
-        anchors.centerIn: Overlay.overlay
-        visible:true
-        closePolicy: Popup.NoAutoClose
-        background:Rectangle
+        width:300
+
+        height:parent.height
+        focus:true
+        modal:true
+
+
+        background: Rectangle
         {
-            color:"#0f171e"
-            border.width: 1
-            border.color: "white"
-            radius:8
+            color:CustomStyle.backColor1
         }
         ColumnLayout
         {
             anchors.fill:parent
-            Node_Connections
+
+
+            Rectangle
             {
-                id:nodeco
+                color:CustomStyle.backColor2
+                radius:Math.min(width,height)*0.05
+                Layout.minimumWidth: 100
+                Layout.maximumHeight: (Node_Conection.state)?200:100
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.alignment: Qt.AlignCenter
-                Layout.preferredWidth: 350
-                Layout.preferredHeight: 250
+                Layout.minimumHeight: (Node_Conection.state)? 120:50
+                Layout.alignment: Qt.AlignHCenter|Qt.AlignTop
+                Layout.margins: 20
+                border.color:CustomStyle.midColor1
+                border.width: 1
+                ColumnLayout
+                {
+                    anchors.fill:parent
+                    TextAddress
+                    {
+                        visible:Node_Conection.state
+                        description:qsTr("<b>Server id</b>")
+                        address:Book_Server.serverId
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        Layout.alignment: Qt.AlignTop
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.minimumHeight: 30
+                        Layout.margins: 5
+                    }
+                    Text
+                    {
+                        font:(Node_Conection.state)?CustomStyle.h3:CustomStyle.h2
+                        text:(Node_Conection.state)?qsTr("Available Balance: "):qsTr("Waiting for node")
+                        horizontalAlignment:Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        color: CustomStyle.frontColor1
+                        fontSizeMode:Text.Fit
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignCenter
+                        Layout.fillHeight: true
+                    }
+                    AmountText
+                    {
+                        visible:Node_Conection.state
+                        font:CustomStyle.h2
+                        jsob:Book_Server.funds
+                        horizontalAlignment:Text.AlignHCenter
+                        fontSizeMode:Text.Fit
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignCenter
+                        Layout.fillHeight: true
+                    }
+                    Text
+                    {
+                        visible:Number(Book_Server.funds.largeValue.value)<Number(Book_Server.minfunds.largeValue.value)
+                        font:CustomStyle.h4
+                        text: "Transfer at least:" + (Number(Book_Server.minfunds.largeValue.value)-Number(Book_Server.funds.largeValue.value)) + '<font color=\"'+CustomStyle.frontColor2+'\">'+Book_Server.minfunds.largeValue.unit+'</font>'
+                        horizontalAlignment:Text.AlignHCenter
+                        color: CustomStyle.frontColor1
+                        fontSizeMode:Text.Fit
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignCenter
+                        Layout.fillHeight: true
+                    }
+
+                }
+
+            }
+
+            Node_Connections
+            {
+                id:conn_
+                Layout.fillWidth: true
+                Layout.minimumHeight: 30
+                collapsed:1.0
             }
             AccountQml
             {
+                id:acc_
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.maximumHeight: 500
-                Layout.alignment: Qt.AlignTop
-                Layout.preferredHeight: 300
-                Layout.preferredWidth:nodeco.width
+                Layout.minimumHeight: 30
             }
 
-            MyButton
-            {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.maximumHeight: 50
-                Layout.maximumWidth: 75
-                Layout.preferredWidth: 50
-                Layout.minimumHeight: 25
-                Layout.minimumWidth:50
-                Layout.alignment: Qt.AlignHCenter
-                text:qsTr("Start")
-                enabled: Node_Conection.state
-
-                onClicked:{
-                    settings.close();
-                    if(Book_Server.transfer_funds)
-                    {
-                        payserver.init=true;
-                        payserver.open();
-                    }
-                }
-            }
         }
+
     }
-    MyPayPopUp
-    {
-        id:payserver
-        property bool init:false
-        descr_:""
-        addr_: ""
-        url_:""
-        anchors.centerIn: Overlay.overlay
-        visible:Book_Server.transfer_funds&&payserver.init
-        closePolicy: Popup.NoAutoClose
-        background:Rectangle
-        {
-            color:"#0f171e"
-            border.width: 1
-            border.color: "white"
-            radius:8
-        }
-        onVisibleChanged:
-        {
-            if(visible)
-            {
-                payserver.addr_= Account.addr_bech32([0,0,0],Node_Conection.info().protocol.bech32Hrp)
-                payserver.descr_=qsTr("Transfer at least "+ Book_Server.transfer_funds +" "+Node_Conection.info().baseToken.subunit+ " to:\n"+payserver.addr_);
-                payserver.url_="firefly:v1/wallet/send?recipient="+payserver.addr_+"&amount="+Book_Server.transfer_funds
-            }
-        }
-    }
-
-
-
-
-
 
     ColumnLayout
     {
@@ -131,50 +161,66 @@ ApplicationWindow {
         Head
         {
             id:head
-            property bool init:true
-            Layout.maximumHeight: 300
-            Layout.minimumHeight: 100
-            Layout.fillHeight:  true
+            Layout.preferredHeight: 100
             Layout.minimumWidth: 300
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignCenter
+            Layout.alignment: Qt.AlignTop
             butt.text:(init)?"Open box":"back"
-            butt.enabled:Node_Conection.state&&!Book_Server.transfer_funds
+            butt.enabled:Node_Conection.state
 
             butt.onClicked:
             {
+                if(head.init)Book_Server.try_to_open();
+                if(!head.init)Book_Server.open=false;
                 head.init=!head.init
+
             }
         }
 
-        Rectangle
-        {
-            id:bott
-            color:"#0f171e"
-            Layout.minimumHeight: 300
-            Layout.preferredHeight: 400
-            Layout.fillHeight:  true
-            Layout.minimumWidth: 200
+
+        Day_swipe_view {
+            id: dayview
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignCenter
-            Day_swipe_view {
-                id: dayview
-                clip:true
-                can_book:false
-                anchors.fill:parent
-                visible:head.init
-            }
-            Enter_Pin_server
-            {
-                visible:!head.init
-                anchors.fill:parent
-            }
+            Layout.fillHeight:  true
+            Layout.minimumWidth: 300
+            Layout.maximumWidth: 700
+            Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
+            clip:true
+            can_book:false
+            Layout.leftMargin: seetbutt.width
+            Layout.rightMargin: seetbutt.width
+            visible:head.init
         }
+        Enter_Pin_server
+        {
+            visible:!head.init
+            Layout.fillWidth: true
+            Layout.fillHeight:  true
+            Layout.minimumWidth: 300
+            Layout.maximumWidth: 700
+            Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
+            Layout.leftMargin: seetbutt.width
+            Layout.rightMargin: seetbutt.width
+        }
+
+
 
     }
 
+    MySettButton
+    {
+        id:seetbutt
+        width: 40 + ((window.width>400)?10:0) + ((window.width>800)?20:0)
+        x:settings.width*settings.position
+        y:(window.height-height)*0.5
+        height:width
+        onClicked:
+        {
+            settings.open()
+        }
+        animate: settings.position>0.1
 
-
+    }
 
 }
 
