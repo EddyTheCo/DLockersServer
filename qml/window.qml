@@ -44,7 +44,7 @@ ApplicationWindow {
     Connections {
         target: Book_Server
         function onGot_new_booking(boo) {
-            Day_model.add_booking(boo,false);
+            Day_model.add_booking(boo);
         }
     }
 

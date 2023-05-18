@@ -30,6 +30,7 @@ void Book_Server::init()
         auto resp=Node_Conection::mqtt_client->
                 get_outputs_unlock_condition_address("address/"+Account::addr_bech32({0,0,1},info->bech32Hrp));
         QObject::connect(resp,&ResponseMqtt::returned,reciever,[=](QJsonValue data){
+
             if(state_==Ready)
             {
                 handle_new_book(Node_output(data));
@@ -113,7 +114,7 @@ void Book_Server::checkFunds(std::vector<qiota::Node_output>  outs)
         std::vector<Node_output> var{v};
         auto bundle= Account::get_addr({0,0,0});
         bundle.consume_outputs(var);
-        qDebug()<<"amount:"<<bundle.amount;
+
         if(bundle.amount)
         {
             total+=bundle.amount;
@@ -235,18 +236,23 @@ void Book_Server::check_nft_to_open(Node_output node_out)
                 {
                     const auto metadata=std::static_pointer_cast<const Metadata_Feature>(metfeature)->data();
 
-                    auto book=Booking::get_new_booking_from_metadata(metadata);
+                    auto books=Booking::get_new_bookings_from_metadata(metadata);
 
+                    auto vec=Booking::from_Array(books);
                     auto now=QDateTime::currentDateTime().toSecsSinceEpoch();
 
 
-
-                    if(book["finish"].toInteger()>=now&&book["start"].toInteger()<=now)
+                    for(auto book: vec )
                     {
-                        open=true;
-                        emit openChanged();
+                        if(book["finish"].toInteger()>=now&&book["start"].toInteger()<=now)
+                        {
+                            open=true;
+                            emit openChanged();
+                            break;
 
+                        }
                     }
+
                 }
 
             }
@@ -273,75 +279,109 @@ void Book_Server::handle_new_book(Node_output node_out)
                     auto metadata_feature=std::static_pointer_cast<const Metadata_Feature>(metfeature);
                     auto metadata=metadata_feature->data();
 
-                    auto new_book=Booking::get_new_booking_from_metadata(metadata);
+                    auto new_books=Booking::get_new_bookings_from_metadata(metadata);
+
                     const auto now=QDateTime::currentDateTime().toSecsSinceEpoch();
                     const auto sendfeature=basic_output_->get_feature_(Feature::Sender_typ);
                     if(sendfeature)
                     {
                         auto sender=std::static_pointer_cast<const Sender_Feature>(sendfeature)->sender();
 
-                        if(!new_book.isEmpty()&&new_book["finish"].toInteger()>=now)
+
+                        if(!new_books.isEmpty())
                         {
 
                             auto output=std::vector<Node_output>{node_out};
                             auto payment_bundle=Account::get_addr({0,0,1});
                             payment_bundle.consume_outputs({output});
 
+                            QJsonArray varBooks;
+                            auto vec=Booking::from_Array(new_books);
+                            quint64 price=0;
+                            quint64 maxB=0;
 
-                            const auto eddAddr=Account::get_addr({0,0,0}).get_address();
-                            const auto issuerFea=Feature::Issuer(eddAddr);
-
-                            auto addUnlcon=Unlock_Condition::Address(sender);
-                            auto nftmetadata=Booking::create_new_bookings_metadata(new_book);
-                            auto metFea=Feature::Metadata(nftmetadata);
-                            auto NftOut= Output::NFT(0,{addUnlcon},{},{issuerFea,metFea});
-                            NftOut->amount_=Client::get_deposit(NftOut,info);
-
-                            if(payment_bundle.amount>=new_book.calculate_price(price_per_hour_)+NftOut->amount_)
+                            for(auto i=0;i<vec.size();i++)
                             {
-                                auto pair=books_.insert(new_book);
-                                if(pair.second)
+                                if(vec[i]["finish"].toInteger()>vec[i]["start"].toInteger()&&
+                                        vec[i]["start"].toInteger()>0&&
+                                        vec[i]["finish"].toInteger()<QDateTime::currentDateTime().addDays(7).toSecsSinceEpoch())
                                 {
+                                    auto pair=books_.insert(vec.at(i));
+                                    if(pair.second)
+                                    {
+                                        price+=vec.at(i).calculate_price(price_per_hour_);
 
-                                    auto publish_bundle=Account::get_addr({0,0,0});
-                                    publish_bundle.consume_outputs(publish_node_outputs_->outs_);
-
-                                    auto Inputs_Commitment=Block::get_inputs_Commitment(payment_bundle.Inputs_hash+publish_bundle.Inputs_hash);
-
-                                    const auto pubOut=get_publish_output(publish_bundle.amount+payment_bundle.amount-NftOut->amount_);
-                                    pvector<const Output> the_outputs_{pubOut,NftOut};
-                                    the_outputs_.insert( the_outputs_.end(), publish_bundle.ret_outputs.begin(), publish_bundle.ret_outputs.end());
-                                    the_outputs_.insert( the_outputs_.end(), payment_bundle.ret_outputs.begin(), payment_bundle.ret_outputs.end());
-
-                                    pvector<const Input> the_inputs_=payment_bundle.inputs;
-                                    the_inputs_.insert( the_inputs_.end(), publish_bundle.inputs.begin(), publish_bundle.inputs.end());
-
-                                    auto essence=Essence::Transaction(info->network_id_,the_inputs_,Inputs_Commitment,the_outputs_);
-
-                                    payment_bundle.create_unlocks(essence->get_hash());
-                                    publish_bundle.create_unlocks(essence->get_hash());
-
-                                    pvector<const Unlock> the_unlocks_=payment_bundle.unlocks;
-                                    the_unlocks_.insert( the_unlocks_.end(), publish_bundle.unlocks.begin(), publish_bundle.unlocks.end());
-
-
-                                    auto trpay=Payload::Transaction(essence,the_unlocks_);
-
-                                    auto resp=Node_Conection::mqtt_client->get_subscription("transactions/"+trpay->get_id().toHexString() +"/included-block");
-                                    connect(resp,&ResponseMqtt::returned,this,[=](auto var){
-                                        set_state(Ready);
-                                        resp->deleteLater();
-                                    });
-                                    payments_.push_back(info->amount_json(payment_bundle.amount));
-                                    emit paymentsChange();
-                                    auto block_=Block(trpay);
-
-                                    Node_Conection::rest_client->send_block(block_);
-                                    emit got_new_booking(new_book);
-                                    clean_state();
+                                        if(payment_bundle.amount<price)
+                                        {
+                                            books_.erase(vec.at(i));
+                                            price-=vec.at(i).calculate_price(price_per_hour_);
+                                            break;
+                                        }
+                                        varBooks.push_back(new_books.at(2*i));
+                                        varBooks.push_back(new_books.at(2*i+1));
+                                        if(new_books.at(2*i+1).toInteger()>maxB)maxB=new_books.at(2*i+1).toInteger();
+                                    }
                                 }
-
                             }
+
+
+                            if(!varBooks.isEmpty())
+                            {
+                                const auto eddAddr=Account::get_addr({0,0,0}).get_address();
+                                const auto issuerFea=Feature::Issuer(eddAddr);
+
+                                auto addUnlcon=Unlock_Condition::Address(sender);
+                                auto expirUnloc=Unlock_Condition::Expiration(maxB+100,eddAddr);
+                                auto varretUlock=Unlock_Condition::Storage_Deposit_Return(eddAddr,0);
+                                auto nftmetadata=Booking::create_new_bookings_metadata(varBooks);
+                                auto metFea=Feature::Metadata(nftmetadata);
+                                auto varNftOut= Output::NFT(0,{addUnlcon,varretUlock,expirUnloc},{},{issuerFea,metFea});
+                                auto ret_amount=Client::get_deposit(varNftOut,info);
+
+                                auto retUlock=Unlock_Condition::Storage_Deposit_Return(eddAddr,ret_amount);
+                                auto NftOut= Output::NFT(0,{addUnlcon,retUlock,expirUnloc},{},{issuerFea,metFea});
+                                NftOut->amount_=Client::get_deposit(NftOut,info)+payment_bundle.amount-price;
+
+                                auto publish_bundle=Account::get_addr({0,0,0});
+                                publish_bundle.consume_outputs(publish_node_outputs_->outs_);
+
+                                auto Inputs_Commitment=Block::get_inputs_Commitment(payment_bundle.Inputs_hash+publish_bundle.Inputs_hash);
+
+                                const auto pubOut=get_publish_output(publish_bundle.amount+payment_bundle.amount-NftOut->amount_);
+                                pvector<const Output> the_outputs_{pubOut,NftOut};
+                                the_outputs_.insert( the_outputs_.end(), publish_bundle.ret_outputs.begin(), publish_bundle.ret_outputs.end());
+                                the_outputs_.insert( the_outputs_.end(), payment_bundle.ret_outputs.begin(), payment_bundle.ret_outputs.end());
+
+                                pvector<const Input> the_inputs_=payment_bundle.inputs;
+                                the_inputs_.insert( the_inputs_.end(), publish_bundle.inputs.begin(), publish_bundle.inputs.end());
+
+                                auto essence=Essence::Transaction(info->network_id_,the_inputs_,Inputs_Commitment,the_outputs_);
+
+                                payment_bundle.create_unlocks(essence->get_hash());
+                                publish_bundle.create_unlocks(essence->get_hash(),payment_bundle.unlocks.size());
+
+                                pvector<const Unlock> the_unlocks_=payment_bundle.unlocks;
+                                the_unlocks_.insert( the_unlocks_.end(), publish_bundle.unlocks.begin(), publish_bundle.unlocks.end());
+
+
+                                auto trpay=Payload::Transaction(essence,the_unlocks_);
+
+                                auto resp=Node_Conection::mqtt_client->get_subscription("transactions/"+trpay->get_id().toHexString() +"/included-block");
+                                connect(resp,&ResponseMqtt::returned,this,[=](auto var){
+                                    set_state(Ready);
+                                    resp->deleteLater();
+                                });
+                                payments_.push_back(info->amount_json(payment_bundle.amount));
+                                emit paymentsChange();
+                                auto block_=Block(trpay);
+
+                                Node_Conection::rest_client->send_block(block_);
+
+                                emit got_new_booking(varBooks);
+                                clean_state();
+                            }
+
+
                         }
                     }
 
@@ -394,6 +434,11 @@ void Book_Server::handle_init_funds()
                 auto trpay=Payload::Transaction(essence,publish_bundle.unlocks);
 
                 auto block_=Block(trpay);
+                auto resp=Node_Conection::mqtt_client->get_subscription("transactions/"+trpay->get_id().toHexString() +"/included-block");
+                connect(resp,&ResponseMqtt::returned,this,[=](auto var){
+                    set_state(Ready);
+                    resp->deleteLater();
+                });
                 set_state(Publishing);
                 Node_Conection::rest_client->send_block(block_);
                 started=true;
@@ -436,13 +481,16 @@ QByteArray Book_Server::serialize_state(void)const
 {
     QJsonObject var;
     QJsonArray bookings;
+
     for(const auto& v: books_)
     {
-        bookings.append(v);
+        bookings.append(v["start"]);
+        bookings.append(v["finish"]);
     }
     var.insert("bookings",bookings);
     var.insert("price_per_hour",QString::number(price_per_hour_));
     var.insert("pay_to",Account::addr({0,0,1}));
+
     auto state = QJsonDocument(var);
     return state.toJson();
 }
@@ -452,11 +500,13 @@ void Book_Server::deserialize_state(const QByteArray &state)
     if(!var["bookings"].isUndefined()&&var["bookings"].isArray())
     {
         const auto bookarray=var["bookings"].toArray();
-        for(const auto& v:bookarray)
+        const auto vec=Booking::from_Array(bookarray);
+        for(const auto& v:vec)
         {
-            books_.insert(v.toObject());
-            emit got_new_booking(v);
+            books_.insert(v);
+
         }
+        emit got_new_booking(bookarray);
         started=true;
     }
 
