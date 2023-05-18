@@ -3,10 +3,10 @@
 
 ## Proof of Concept on implementing decentralized applications on the IOTA network.
 
-This application can be seen as a decentralized server that allows you to book a locker by paying with Shimmer.
+This application can be seen as a decentralized server that allows you to book a locker by paying with cryptos.
 In order to use the application one needs to set the address of the node to connect.
 The Proof of Work has to be performed by the node (by setting the JWT for protected routes, by enabling PoW in the node...).
-In principle it will also work for the shimmer mainnet by setting the node to a mainnet one(I have not tried).
+In principle it will also work for the mainnet by setting the node to a mainnet one(I have not tried).
 This application is meant to be used on the testnet.
 If using the mainnet **you are the ONLY responsible for the eventual loss of your funds**.
 
@@ -20,17 +20,16 @@ creation(if reload the page the server loses its funds).
 
 
 From now, one can connect different clients to the same server but not different server to the same client.
-This can be easily implemented and will allow you to choose for example the server closest to you.
+This can be easily implemented and will allow you to choose for example, the server closest to you.
 
 
 The server looks for new bookings sent by the clients and checks the validity of these bookings.
-A booking is valid if it has an allowed  start and finish time, a code and the price payed for the booking is correct.
-If everything is fine the server collect the money from the client and update its internal state.
+A booking is valid if it has an allowed  start and finish time and the price payed for the booking is correct.
+If everything is fine the server collect the money from the client, update its internal state and send a NFT to the client.
 
 
-The server allows you to open the locker if it has a booking at that time and you entered a correct pin.
-For the propose of this proof of concept  the  pin is a number of 5 digits but in real applications the pin should be a
-large string.
+The server allows you to open the locker if it has a booking at that time and you own a NFT signed by the server.
+The signed NFT has immutable metadata that reference certain time interval of the bookings the client has paid.
 
 ## The bigger picture
 
@@ -38,5 +37,6 @@ large string.
 * You do not depend on centralize company servers to store your business data or to process payments.
 * As longer as you maintain a node(blockchain), your gainings  and business data are cryptographically secured. 
 * The code is open source and grant you certain rights and responsibilities to respect other people rights.
+* By using NFTs the client can pass the right to open a box to other client.
 
 
