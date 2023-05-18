@@ -46,6 +46,9 @@ ApplicationWindow {
         function onGot_new_booking(boo) {
             Day_model.add_booking(boo);
         }
+        function onNotEnought(amount) {
+            noti.show({"message":"Not enough funds\n "+ "lack of "+ amount.largeValue.value + " "+ amount.largeValue.unit });
+        }
     }
 
     Drawer {

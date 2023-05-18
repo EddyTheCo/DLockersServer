@@ -93,7 +93,7 @@ void Book_Server::restart(void)
         if(reciever)reciever->deleteLater();
         reciever=new QObject(this);
         setFunds(0);
-        setminFunds(0);
+        setminFunds(1000000);
         total_funds.clear();
         payments_=QJsonArray();
         connect(this,&Book_Server::stateChanged,reciever,[=](){
@@ -345,40 +345,51 @@ void Book_Server::handle_new_book(Node_output node_out)
                                 auto publish_bundle=Account::get_addr({0,0,0});
                                 publish_bundle.consume_outputs(publish_node_outputs_->outs_);
 
-                                auto Inputs_Commitment=Block::get_inputs_Commitment(payment_bundle.Inputs_hash+publish_bundle.Inputs_hash);
+                                const auto pubOut=get_publish_output(0);
 
-                                const auto pubOut=get_publish_output(publish_bundle.amount+payment_bundle.amount-NftOut->amount_);
-                                pvector<const Output> the_outputs_{pubOut,NftOut};
-                                the_outputs_.insert( the_outputs_.end(), publish_bundle.ret_outputs.begin(), publish_bundle.ret_outputs.end());
-                                the_outputs_.insert( the_outputs_.end(), payment_bundle.ret_outputs.begin(), payment_bundle.ret_outputs.end());
-
-                                pvector<const Input> the_inputs_=payment_bundle.inputs;
-                                the_inputs_.insert( the_inputs_.end(), publish_bundle.inputs.begin(), publish_bundle.inputs.end());
-
-                                auto essence=Essence::Transaction(info->network_id_,the_inputs_,Inputs_Commitment,the_outputs_);
-
-                                payment_bundle.create_unlocks(essence->get_hash());
-                                publish_bundle.create_unlocks(essence->get_hash(),payment_bundle.unlocks.size());
-
-                                pvector<const Unlock> the_unlocks_=payment_bundle.unlocks;
-                                the_unlocks_.insert( the_unlocks_.end(), publish_bundle.unlocks.begin(), publish_bundle.unlocks.end());
+                                if(publish_bundle.amount+payment_bundle.amount>=NftOut->amount_+Client::get_deposit(pubOut,info))
+                                {
+                                    pubOut->amount_=publish_bundle.amount+payment_bundle.amount-NftOut->amount_;
+                                    auto Inputs_Commitment=Block::get_inputs_Commitment(payment_bundle.Inputs_hash+publish_bundle.Inputs_hash);
 
 
-                                auto trpay=Payload::Transaction(essence,the_unlocks_);
+                                    pvector<const Output> the_outputs_{pubOut,NftOut};
+                                    the_outputs_.insert( the_outputs_.end(), publish_bundle.ret_outputs.begin(), publish_bundle.ret_outputs.end());
+                                    the_outputs_.insert( the_outputs_.end(), payment_bundle.ret_outputs.begin(), payment_bundle.ret_outputs.end());
 
-                                auto resp=Node_Conection::mqtt_client->get_subscription("transactions/"+trpay->get_id().toHexString() +"/included-block");
-                                connect(resp,&ResponseMqtt::returned,this,[=](auto var){
-                                    set_state(Ready);
-                                    resp->deleteLater();
-                                });
-                                payments_.push_back(info->amount_json(payment_bundle.amount));
-                                emit paymentsChange();
-                                auto block_=Block(trpay);
+                                    pvector<const Input> the_inputs_=payment_bundle.inputs;
+                                    the_inputs_.insert( the_inputs_.end(), publish_bundle.inputs.begin(), publish_bundle.inputs.end());
 
-                                Node_Conection::rest_client->send_block(block_);
+                                    auto essence=Essence::Transaction(info->network_id_,the_inputs_,Inputs_Commitment,the_outputs_);
 
-                                emit got_new_booking(varBooks);
-                                clean_state();
+                                    payment_bundle.create_unlocks(essence->get_hash());
+                                    publish_bundle.create_unlocks(essence->get_hash(),payment_bundle.unlocks.size());
+
+                                    pvector<const Unlock> the_unlocks_=payment_bundle.unlocks;
+                                    the_unlocks_.insert( the_unlocks_.end(), publish_bundle.unlocks.begin(), publish_bundle.unlocks.end());
+
+
+                                    auto trpay=Payload::Transaction(essence,the_unlocks_);
+
+                                    auto resp=Node_Conection::mqtt_client->get_subscription("transactions/"+trpay->get_id().toHexString() +"/included-block");
+                                    connect(resp,&ResponseMqtt::returned,this,[=](auto var){
+                                        set_state(Ready);
+                                        resp->deleteLater();
+                                    });
+                                    payments_.push_back(info->amount_json(payment_bundle.amount));
+                                    emit paymentsChange();
+                                    auto block_=Block(trpay);
+
+                                    Node_Conection::rest_client->send_block(block_);
+
+                                    emit got_new_booking(varBooks);
+                                    clean_state();
+                                }
+                                else
+                                {
+                                    emit notEnought(info->amount_json(NftOut->amount_+Client::get_deposit(pubOut,info) - publish_bundle.amount-payment_bundle.amount));
+                                }
+
                             }
 
 
@@ -414,7 +425,7 @@ void Book_Server::handle_init_funds()
             publish_bundle.consume_outputs(node_outputs_->outs_);
             auto pubOut=get_publish_output(0);
             const auto min_output_pub=Client::get_deposit(pubOut,info);
-            setminFunds(min_output_pub);
+
             pubOut->amount_=publish_bundle.amount;
             auto Addrpub=Account::get_addr({0,0,0}).get_address();
 

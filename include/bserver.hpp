@@ -56,7 +56,7 @@ signals:
     void got_new_booking(QJsonValue nbook);
     void nftAddress(QString);
     void serverIdChanged();
-
+    void notEnought(QJsonObject);
     void accountChanged();
     void finishRestart();
     void stateChanged();
