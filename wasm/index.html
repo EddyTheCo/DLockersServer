@@ -21,12 +21,15 @@
 		<title>DLockers Server</title>
 	</head>
 
-	<body onload="init();LoadFile('https://eddytheco.github.io/DLockersServer/README.md');">
-		<div class="pair" data-role="splitter" data-on-resize-split="resizeSplitX" class="h-100" >
+	<body onload="init();">
+		<div class="pair" data-role="splitter" data-on-resize-split="resizeSplitX" class="h-100" data-split-sizes="65, 35">
 			<div class="codeArea d-flex flex-justify-center flex-align-center">
 				<div id="editor" style="margin:0px;">
-					<md-block id="md">
+					<md-block  src="https://raw.githubusercontent.com/EddyTheCo/DLockersServer/main/README.md">
 						       </md-block>
+					<div id="buyme" style="float:left;width:95%;height:30%;margin-left: 2.5%;">
+						<h3 style="text-align: center;">Buy Me a Coffee</h3>
+						</div>
 				</div>
 			</div>
 			<div class="playArea d-flex flex-justify-center flex-align-center" id="qtrootDiv">

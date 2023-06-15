@@ -1,0 +1,17 @@
+name: build-wasm
+run-name: ${{ github.actor }} ${{ github.event_name }} to ${{ github.base_ref }} 
+on:
+  pull_request_target:
+    types: [closed]
+    branches: [main]
+jobs:
+  build-html:
+    uses: EddyTheCo/Common/.github/workflows/build-wasm.yml@main
+    if: ${{ (github.event.pull_request.merged == true) && (startsWith(github.base_ref, 'main')) }}  
+    permissions:
+      pages: write
+      id-token: write
+    with:
+      qtModules: 'qtwebsockets qtshadertools'
+    secrets:
+      NODE_JWT: ${{ secrets.NODE_JWT }}
