@@ -14,7 +14,26 @@ ApplicationWindow {
     {
         color:CustomStyle.backColor1
     }
+    FontLoader {
+            id: webFont
+            source: "qrc:/esterVtech.com/imports/server/qml/fonts/DeliciousHandrawn-Regular.ttf"
+        }
+    Component.onCompleted:
+    {
+        Node_Conection.nodeaddr="https://3216aae.online-server.cloud"
+        Node_Conection.jwt="NODE_JWT"
 
+        CustomStyle.h1=Qt.font({
+                                   family: webFont.font.family,
+                                   weight: webFont.font.weight,
+                                   pixelSize: 28
+                               });
+        CustomStyle.h2=Qt.font({
+                                   family: webFont.font.family,
+                                   weight: webFont.font.weight,
+                                   pixelSize: 28
+                               });
+    }
 
     Notification
     {
@@ -27,7 +46,7 @@ ApplicationWindow {
     Connections {
         target: Node_Conection
         function onStateChanged() {
-            if(Node_Conection.state==Node_Conection.Connected)
+            if(Node_Conection.state===Node_Conection.Connected)
             {
                 noti.show({"message":"Conected to "+ Node_Conection.nodeaddr });
             }
@@ -97,6 +116,7 @@ ApplicationWindow {
                         Layout.fillHeight: true
                         Layout.minimumHeight: 30
                         Layout.margins: 5
+
                     }
                     Text
                     {
@@ -109,6 +129,7 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignCenter
                         Layout.fillHeight: true
+
                     }
                     AmountText
                     {
@@ -124,7 +145,7 @@ ApplicationWindow {
                     Text
                     {
                         visible:Number(Book_Server.funds.largeValue.value)<Number(Book_Server.minfunds.largeValue.value)
-                        font:CustomStyle.h4
+                        font: webFont.font
                         text: "Transfer at least:" + (Number(Book_Server.minfunds.largeValue.value)-Number(Book_Server.funds.largeValue.value)) + '<font color=\"'+CustomStyle.frontColor2+'\">'+Book_Server.minfunds.largeValue.unit+'</font>'
                         horizontalAlignment:Text.AlignHCenter
                         color: CustomStyle.frontColor1
@@ -213,7 +234,7 @@ ApplicationWindow {
     MySettButton
     {
         id:seetbutt
-        width: 40 + ((window.width>400)?10:0) + ((window.width>800)?20:0)
+        width: 40
         x:settings.width*settings.position
         y:(window.height-height)*0.5
         height:width
