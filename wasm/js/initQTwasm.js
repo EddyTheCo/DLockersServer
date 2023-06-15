@@ -17,14 +17,14 @@
 // logoPath : fullpath to a logo image to show when compiling wasm
 //
 
-        let qtLoader = undefined;
 function initQTwasm(wasm_url, app_name, rootDivSele, logoPath) {
 	const rootDiv = document.querySelector(rootDivSele);
 
-	rootDiv.innerHTML += '<figure  id="qtspinner"> <center > <img id="logo" crossorigin="anonymous" src="' + logoPath + '" ></img> <div id="qtstatus"></div> </center> </figure> <div id="screen" ></div>';
+	const screen = "screen" + app_name;
+	rootDiv.innerHTML += '<figure  id="qtspinner"> <center > <img id="logo" crossorigin="anonymous" src="' + logoPath + '" ></img> <div id="qtstatus"></div> </center> </figure> <div class="qtscreen" id="'+ screen +'" ></div>';
 
 	const spinner = rootDiv.querySelector('#qtspinner');
-	const canvas = rootDiv.querySelector('#screen');
+	const canvas = rootDiv.querySelector('#'+ screen);
 	const status = rootDiv.querySelector('#qtstatus');
 
 	const logo = spinner.querySelector('#logo');
@@ -60,4 +60,5 @@ function initQTwasm(wasm_url, app_name, rootDivSele, logoPath) {
               },
 	});
 	qtLoader.loadEmscriptenModule(app_name);
+	return qtLoader;
 }
