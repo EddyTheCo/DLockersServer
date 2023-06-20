@@ -26,13 +26,13 @@ a{
 	width:50%;
 	height:50%;
 	bottom: 25%;
-	right: 25%; 
+	right: 25%;
 	display:block;
 	z-index: 1000
 }
 .codeArea {
-	width: 0%;
-	height:0%;
+	width: 100%;
+	height:100%;
 	float: left;
 
 }
@@ -42,12 +42,7 @@ a{
 	float: left;
 }
 #editor {
-	width: 0%;
-	height: 0%;
-	float: left;
-	font-family: 'Ubuntu Condensed';
-	font-size: 1.3vw;
-	overflow-y:scroll;
+	visibility: hidden;
 }
 .qtscreen { width: 100%; height: 100%; }
 figure
@@ -71,9 +66,7 @@ center
 }
 footer
 {
-	float:left;
-	width:0%;
-	height:0%;
+	display: none;
 	background-color: #10141c;
 	font-size: 2vw;
 }
@@ -89,15 +82,15 @@ footer
 	flex-direction: column;
 }
 .splitter {
-    display: flex;
+	display: flex;
 }
 .splitter > .gutter {
-    background-color: #10141c;
-    border: 0px;
+	background-color: #10141c;
+	border: 0px;
 }
 
 .splitter > .gutter::before {
-    background-color: #0f79af;
+	background-color: #0f79af;
 }
 @media screen and (min-width: 700px) {
 	.pair
@@ -109,15 +102,13 @@ footer
 		width: 70%;
 		height: 100%;
 	}
-	.playArea {
-		width: 30%;
-		height: 100%;
-	}
 	footer
 	{
+		float:left;
 		height:10%;
 		width:100%;
 		font-size: 1vw;
+		display: inherit;
 	}
 	.fcont
 	{
@@ -128,5 +119,18 @@ footer
 	#editor {
 		width: 100%;
 		height: 100%;
+		visibility: visible;
+		font-family: 'Ubuntu Condensed';
+		font-size: 1.3vw;
+		overflow-y:scroll;
 	}
+	#buyme
+	{
+		opacity: 0.0;
+		float:left;
+		width:95%;
+		height:30%;
+		margin-left: 2.5%;
+	}
+	
 }

@@ -13,6 +13,7 @@ function init() {
                   }
                   counter++;
                   if(counter>60)clearInterval(checkModuleLoad);
+	document.getElementById('buyme').style.opacity = 1.0;
           }, 1000);
 
 }
