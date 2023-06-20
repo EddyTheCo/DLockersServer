@@ -36,13 +36,13 @@ function initQTwasm(wasm_url, app_name, rootDivSele, logoPath) {
 		restartType: 'RestartModule',
               canvasElements : [canvas],
               showLoader: function(loaderStatus) {
-                  spinner.style.display = 'block';
+                  spinner.style.display = (logoPath)?'block':'none';
                   canvas.style.display = 'none';
                   status.innerHTML = loaderStatus + "...";
               },
               showError: function(errorText) {
                   status.innerHTML = errorText;
-                  spinner.style.display = 'block';
+                  spinner.style.display = (logoPath)?'block':'none';
                   canvas.style.display = 'none';
               },
               showExit: function() {
@@ -51,7 +51,7 @@ function initQTwasm(wasm_url, app_name, rootDivSele, logoPath) {
                       status.innerHTML += " with code " + qtLoader.exitCode;
                   if (qtLoader.exitText !== undefined)
                       status.innerHTML += " (" + qtLoader.exitText + ")";
-                  spinner.style.display = 'block';
+                  spinner.style.display = (logoPath)?'block':'none';
                   canvas.style.display = 'none';
               },
               showCanvas: function() {
