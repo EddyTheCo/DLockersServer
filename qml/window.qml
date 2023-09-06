@@ -20,9 +20,8 @@ ApplicationWindow {
         }
     Component.onCompleted:
     {
-        Node_Conection.nodeaddr="https://3216aae.online-server.cloud"
-        Node_Conection.jwt="NODE_JWT"
-
+	if(LocalConf.nodeaddr) Node_Conection.nodeaddr=LocalConf.nodeaddr;
+        if(LocalConf.jwt) Node_Conection.jwt=LocalConf.jwt;
         CustomStyle.h1=Qt.font({
                                    family: webFont.font.family,
                                    weight: webFont.font.weight,
