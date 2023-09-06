@@ -24,6 +24,9 @@ jobs:
       useThread: ${{ matrix.useThread }}
       qtModules: 'qtwebsockets qtshadertools' 
       test: false
+      qtVersion: '6.6.0'
+    secrets:
+      NODE_JWT: ${{ secrets.NODE_JWT }}
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build_test_package
