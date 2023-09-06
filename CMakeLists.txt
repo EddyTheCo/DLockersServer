@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
+if(NODE_JWT)
+    file(WRITE qml/LocalConf.qml "pragma Singleton \n import QtQuick 2.15 \n QtObject { \n property string nodeaddr:\"https://3216aae.online-server.cloud\" \n property string jwt:\"${NODE_JWT}\"\n }" )
+endif(NODE_JWT)
+
 include(local_conf.cmake OPTIONAL)
+
 include(FetchContent)
 FetchContent_Declare(
 	ccommon
@@ -36,36 +41,6 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml )
 
 qt_standard_project_setup()
-
-qt_add_executable(server_main server_main.cpp)
-
-
-qt6_add_qml_module(server_main
-	URI server
-	VERSION 1.0
-	SOURCES
-	src/bserver.cpp  include/bserver.hpp
-	QML_FILES
-	qml/window.qml
-	qml/Enter_Pin_server.qml
-	qml/Head.qml
-	RESOURCE_PREFIX
-	"/esterVtech.com/imports"
-	IMPORTS MyDesigns nodeConection account booking_model
-	IMPORT_PATH
-	${CMAKE_BINARY_DIR}/_deps/mydesigns-build
-	${CMAKE_BINARY_DIR}/_deps/nodeconection-build
-	${CMAKE_BINARY_DIR}/_deps/account-build
-	${CMAKE_BINARY_DIR}/_deps/booking_model-build
-	)
-
-qt_add_resources(server_main "server_main.fonts"
-	PREFIX "/esterVtech.com/imports/server"
-	FILES
-	"qml/fonts/DeliciousHandrawn-Regular.ttf"
-	)
-
-
 FetchContent_Declare(
 	qrCode
 	GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
@@ -77,21 +52,21 @@ FetchContent_MakeAvailable(qrCode)
 FetchContent_Declare(
 	MyDesigns
 	GIT_REPOSITORY https://github.com/EddyTheCo/MyDesigns.git
-	GIT_TAG v0.1.1
+	GIT_TAG v0.2.2
 	FIND_PACKAGE_ARGS 0 CONFIG
 	)
 FetchContent_MakeAvailable(MyDesigns)
 FetchContent_Declare(
 	account
 	GIT_REPOSITORY https://github.com/EddyTheCo/account.git
-	GIT_TAG v0.1.1
+	GIT_TAG v0.2.1
 	FIND_PACKAGE_ARGS 0 CONFIG
 	)
 FetchContent_MakeAvailable(account)
 FetchContent_Declare(
 	nodeConection
 	GIT_REPOSITORY https://github.com/EddyTheCo/ConectionSettings.git
-	GIT_TAG v0.1.3
+	GIT_TAG v0.2.2
 	FIND_PACKAGE_ARGS 0 CONFIG
 	)
 FetchContent_MakeAvailable(nodeConection)
@@ -103,6 +78,36 @@ FetchContent_Declare(
 	FIND_PACKAGE_ARGS 0 CONFIG
 	)
 FetchContent_MakeAvailable(booking_model)
+
+
+qt_add_executable(server_main server_main.cpp)
+
+set_source_files_properties(qml/LocalConf.qml PROPERTIES
+    QT_QML_SINGLETON_TYPE TRUE
+)
+
+qt6_add_qml_module(server_main
+	URI server
+	VERSION 1.0
+	SOURCES
+	src/bserver.cpp  include/bserver.hpp
+	QML_FILES
+	qml/window.qml
+	qml/Enter_Pin_server.qml
+	qml/Head.qml
+	qml/LocalConf.qml
+	RESOURCE_PREFIX
+	"/esterVtech.com/imports"
+	IMPORTS MyDesigns nodeConection account booking_model
+	IMPORT_PATH ${QML_IMPORT_PATH}
+	)
+
+qt_add_resources(server_main "server_main.fonts"
+	PREFIX "/esterVtech.com/imports/server"
+	FILES
+	"qml/fonts/DeliciousHandrawn-Regular.ttf"
+	)
+
 
 target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns)
 target_link_libraries(server_main PRIVATE Qt::Core Qt::Gui Qt::Qml Qt::Quick)
@@ -117,13 +122,23 @@ set_target_properties(server_main PROPERTIES
 	)
 
 
-install(TARGETS server_main ${out_targets_var}
+install(TARGETS server_main
+       BUNDLE  DESTINATION .
 	DESTINATION ${CMAKE_INSTALL_BINDIR}
 	)
+if(QTDEPLOY)
+    qt_generate_deploy_qml_app_script(
+        TARGET server_main
+        OUTPUT_SCRIPT deploy_script
+    )
+install(SCRIPT ${deploy_script})
+endif(QTDEPLOY)
+
 install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/DLockers
 	)
 if(EMSCRIPTEN)
+	prepare_wasm_folder()
 	add_custom_command(
 		TARGET server_main
 		POST_BUILD
@@ -132,9 +147,12 @@ if(EMSCRIPTEN)
 		)
 endif()
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    set(CPACK_PACKAGE_CONTACT "estervtech")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-v${SEMVER}-${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_CXX_COMPILER_ID}")
 
 if(USE_THREADS)
 	set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-MThread")
 endif(USE_THREADS)
 include(CPack)
+endif()
