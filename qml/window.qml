@@ -242,9 +242,10 @@ ApplicationWindow {
         onClicked:
         {
             settings.open()
+            if(Book_Server.rpi_server)Book_Server.open_rpi_box()
         }
         animate: settings.position>0.1
-        visible: !Book_Server.rpi_server
+        //visible: !Book_Server.rpi_server
     }
 
 }

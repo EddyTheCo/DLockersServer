@@ -42,7 +42,9 @@ public:
     void deserialize_state(const QByteArray &state);
     auto payments(void)const{return payments_;}
 
-
+#if defined(RPI_SERVER)
+    Q_INVOKABLE void open_rpi_box(void);
+#endif
     Q_INVOKABLE void try_to_open();
     void setOpen(bool op){if(op!=open){open=op;emit openChanged();}}
     bool is_open()const{return open;}
@@ -64,9 +66,7 @@ signals:
     void paymentsChange();
 
 private:
-#if defined(RPI_SERVER)
-    void open_rpi_box(void);
-#endif
+
     void checkFunds(std::vector<qiota::Node_output>  outs);
     void setFunds(quint64 funds_m);
     void setminFunds(quint64 funds_m);

@@ -240,7 +240,7 @@ void Book_Server::open_rpi_box(void)
     if (err) qDebug()<<"Set out err"<<err;
     lgGpioWrite(chip, GPIO_NUMBER, 1);
     lgGpioWrite(chip, GPIO_NUMBER, 0);
-    qDebug()<<"opening gpio";
+    qDebug()<<"opening gpio:"<<GPIO_NUMBER;
     lgGpiochipClose(chip);
 }
 #endif
