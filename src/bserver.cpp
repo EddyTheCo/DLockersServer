@@ -4,6 +4,10 @@
 #include<QJsonDocument>
 #include<QTimer>
 #include <QRandomGenerator>
+
+#if defined(RPI_SERVER)
+#include"lgpio.h"
+#endif
 using namespace qiota::qblocks;
 
 using namespace qiota;
@@ -15,20 +19,20 @@ void Book_Server::init()
     QObject::connect(info,&Node_info::finished,reciever,[=]( ){
 
         auto resp2=Node_Conection::mqtt_client->
-                get_outputs_unlock_condition_address("address/"+Account::addr_bech32({0,0,0},info->bech32Hrp));
+                     get_outputs_unlock_condition_address("address/"+Account::addr_bech32({0,0,0},info->bech32Hrp));
         connect(resp2,&ResponseMqtt::returned,reciever,[=](QJsonValue data)
-        {
-            if(!started)
-            {
-                this->handle_init_funds();
-            }
-            checkFunds({Node_output(data)});
+                {
+                    if(!started)
+                    {
+                        this->handle_init_funds();
+                    }
+                    checkFunds({Node_output(data)});
 
-        });
+                });
         this->handle_init_funds();
 
         auto resp=Node_Conection::mqtt_client->
-                get_outputs_unlock_condition_address("address/"+Account::addr_bech32({0,0,1},info->bech32Hrp));
+                    get_outputs_unlock_condition_address("address/"+Account::addr_bech32({0,0,1},info->bech32Hrp));
         QObject::connect(resp,&ResponseMqtt::returned,reciever,[=](QJsonValue data){
 
             if(state_==Ready)
@@ -70,16 +74,16 @@ void Book_Server::get_restart_state(void)
             node_outputs_->deleteLater();
         });
         Node_Conection::rest_client->get_outputs<Output::Basic_typ>(node_outputs_,"address="+
-                                                                    Account::addr_bech32({0,0,0},info->bech32Hrp)+
-                                                                    "&hasStorageDepositReturn=false&hasTimelock=false&hasExpiration=false&sender="+
-                                                                    Account::addr_bech32({0,0,0},info->bech32Hrp)+"&tag="+fl_array<quint8>("state").toHexString());
+                                                                                       Account::addr_bech32({0,0,0},info->bech32Hrp)+
+                                                                                       "&hasStorageDepositReturn=false&hasTimelock=false&hasExpiration=false&sender="+
+                                                                                       Account::addr_bech32({0,0,0},info->bech32Hrp)+"&tag="+fl_array<quint8>("state").toHexString());
         auto node_outputs=new Node_outputs();
         connect(node_outputs,&Node_outputs::finished,reciever,[=]( ){
             checkFunds(node_outputs->outs_);
             node_outputs->deleteLater();
         });
         Node_Conection::rest_client->get_outputs<Output::Basic_typ>(node_outputs,"address="+
-                                                                    Account::addr_bech32({0,0,0},info->bech32Hrp));
+                                                                                      Account::addr_bech32({0,0,0},info->bech32Hrp));
 
         info->deleteLater();
     });
@@ -188,7 +192,13 @@ void Book_Server::setminFunds(quint64 funds_m){
 
 }
 Book_Server::Book_Server(QObject *parent):QObject(parent),price_per_hour_(10000),state_(Ready),reciever(nullptr),started(false),
-    open(false)
+    open(false),m_rpi_server(
+#if defined(RPI_SERVER)
+          true
+#else
+          false
+#endif
+          )
 {
     restart();
 }
@@ -218,6 +228,19 @@ std::shared_ptr<qblocks::Output> Book_Server::get_publish_output(const quint64 &
     auto addUnlcon=Unlock_Condition::Address(eddAddr);
     return Output::Basic(amount,{addUnlcon},{},{sendFea,metFea,tagFea});
 }
+#if defined(RPI_SERVER)
+void Book_Server::open_rpi_box(void)
+{
+    auto chip = lgGpiochipOpen(0);
+    lgGpioSetUser(chip, "esterv");
+    auto err = lgGpioClaimOutput(chip, 0, GPIO_NUMBER, 0);
+    if (err) qDebug()<<"Set out err"<<err;
+    lgGpioWrite(chip, GPIO_NUMBER, 1);
+    lgGpioWrite(chip, GPIO_NUMBER, 0);
+    qDebug()<<"opening gpio";
+    lgGpiochipClose(chip);
+}
+#endif
 void Book_Server::check_nft_to_open(Node_output node_out)
 {
 
@@ -246,6 +269,9 @@ void Book_Server::check_nft_to_open(Node_output node_out)
                     {
                         if(book["finish"].toInteger()>=now&&book["start"].toInteger()<=now)
                         {
+#if defined(RPI_SERVER)
+                            open_rpi_box();
+#endif
                             open=true;
                             emit openChanged();
                             break;
@@ -303,8 +329,8 @@ void Book_Server::handle_new_book(Node_output node_out)
                             for(auto i=0;i<vec.size();i++)
                             {
                                 if(vec[i]["finish"].toInteger()>vec[i]["start"].toInteger()&&
-                                        vec[i]["start"].toInteger()>0&&
-                                        vec[i]["finish"].toInteger()<QDateTime::currentDateTime().addDays(7).toSecsSinceEpoch())
+                                    vec[i]["start"].toInteger()>0&&
+                                    vec[i]["finish"].toInteger()<QDateTime::currentDateTime().addDays(7).toSecsSinceEpoch())
                                 {
                                     auto pair=books_.insert(vec.at(i));
                                     if(pair.second)
@@ -478,7 +504,7 @@ void Book_Server::try_to_open(void)
         const auto address=Account::addr_bech32({100,r1,r2},info->bech32Hrp);
 
         resp=Node_Conection::mqtt_client->
-                get_outputs_unlock_condition_address("address/"+address);
+               get_outputs_unlock_condition_address("address/"+address);
         QObject::connect(resp,&ResponseMqtt::returned,reciever,[=](QJsonValue data){
             check_nft_to_open(Node_output(data));
             resp->deleteLater();

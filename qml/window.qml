@@ -15,13 +15,15 @@ ApplicationWindow {
         color:CustomStyle.backColor1
     }
     FontLoader {
-            id: webFont
-            source: "qrc:/esterVtech.com/imports/server/qml/fonts/DeliciousHandrawn-Regular.ttf"
-        }
+        id: webFont
+        source: "qrc:/esterVtech.com/imports/server/qml/fonts/DeliciousHandrawn-Regular.ttf"
+    }
     Component.onCompleted:
     {
-	if(LocalConf.nodeaddr) Node_Conection.nodeaddr=LocalConf.nodeaddr;
+
+        if(LocalConf.nodeaddr) Node_Conection.nodeaddr=LocalConf.nodeaddr;
         if(LocalConf.jwt) Node_Conection.jwt=LocalConf.jwt;
+        if(LocalConf.seed) Account.seed=LocalConf.seed;
         CustomStyle.h1=Qt.font({
                                    family: webFont.font.family,
                                    weight: webFont.font.weight,
@@ -76,7 +78,7 @@ ApplicationWindow {
         height:parent.height
         focus:true
         modal:true
-
+        interactive: !Book_Server.rpi_server
 
         background: Rectangle
         {
@@ -242,7 +244,7 @@ ApplicationWindow {
             settings.open()
         }
         animate: settings.position>0.1
-
+        visible: !Book_Server.rpi_server
     }
 
 }
