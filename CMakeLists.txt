@@ -81,6 +81,30 @@ FetchContent_MakeAvailable(booking_model)
 
 
 qt_add_executable(server_main server_main.cpp)
+set(RPI_SERVER ON)
+if(RPI_SERVER)
+    FetchContent_Declare(
+            lgpio
+            GIT_REPOSITORY https://github.com/EddyTheCo/lg.git
+            GIT_TAG v0.0.1
+            FIND_PACKAGE_ARGS 0 CONFIG
+            )
+    FetchContent_MakeAvailable(lgpio)
+    target_link_libraries(server_main PRIVATE lgpio)
+    target_compile_definitions(server_main PRIVATE RPI_SERVER)
+
+    qt_add_resources(server_main "server_main.conf"
+            PREFIX "/esterVtech.com/imports/server"
+            FILES
+            "rpi_server.conf"
+            )
+        if(RPI_SERVER_GPIO)
+            target_compile_definitions(server_main PRIVATE GPIO_NUMBER=${RPI_SERVER_GPIO})
+        else()
+            target_compile_definitions(server_main PRIVATE GPIO_NUMBER=17)
+        endif()
+
+endif(RPI_SERVER)
 
 set_source_files_properties(qml/LocalConf.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
