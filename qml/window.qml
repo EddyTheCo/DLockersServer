@@ -78,7 +78,7 @@ ApplicationWindow {
         height:parent.height
         focus:true
         modal:true
-        interactive: !Book_Server.rpi_server
+        //interactive: !Book_Server.rpi_server
 
         background: Rectangle
         {
