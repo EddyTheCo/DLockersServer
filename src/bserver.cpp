@@ -239,9 +239,12 @@ void Book_Server::open_rpi_box(void)
     auto err = lgGpioClaimOutput(chip, 0, GPIO_NUMBER, 0);
     if (err) qDebug()<<"Set out err"<<err;
     lgGpioWrite(chip, GPIO_NUMBER, 1);
-    lgGpioWrite(chip, GPIO_NUMBER, 0);
     qDebug()<<"opening gpio:"<<GPIO_NUMBER;
-    lgGpiochipClose(chip);
+    QTimer::singleShot(2000,this,[=](){
+        lgGpioWrite(chip, GPIO_NUMBER, 0);
+        lgGpiochipClose(chip);
+    });
+
 }
 #endif
 void Book_Server::check_nft_to_open(Node_output node_out)
