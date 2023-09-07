@@ -35,7 +35,18 @@ ColumnLayout
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignCenter
     }
+    TextAddress
+    {
+        visible:Node_Conection.state
+        description:qsTr("<b>Server id</b>")
+        address:Book_Server.serverId
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        Layout.alignment: Qt.AlignTop
+        Layout.fillWidth: true
+        Layout.margins: 5
 
+    }
     Rectangle
     {
         id:line
