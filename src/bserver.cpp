@@ -4,7 +4,8 @@
 #include<QJsonDocument>
 #include<QTimer>
 #include <QRandomGenerator>
-
+#include"mydesigns.hpp"
+#include"Day_model.hpp"
 #if defined(RPI_SERVER)
 #include"lgpio.h"
 #endif
@@ -200,6 +201,8 @@ Book_Server::Book_Server(QObject *parent):QObject(parent),price_per_hour_(10000)
 #endif
           )
 {
+    auto foo=fooDesign::fooPrint(); //unused function to force linking
+    foo=fooBookingModel::fooPrint(); //unused function to force linking
     restart();
 }
 
