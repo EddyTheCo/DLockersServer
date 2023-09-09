@@ -44,30 +44,30 @@ qt_standard_project_setup()
 FetchContent_Declare(
 	qrCode
 	GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
-	GIT_TAG v0.0.1
-	FIND_PACKAGE_ARGS 0 CONFIG
+	GIT_TAG v0.0.2
+	FIND_PACKAGE_ARGS 0.0 CONFIG
 	)
 FetchContent_MakeAvailable(qrCode)
 
 FetchContent_Declare(
 	MyDesigns
 	GIT_REPOSITORY https://github.com/EddyTheCo/MyDesigns.git
-	GIT_TAG v0.2.2
-	FIND_PACKAGE_ARGS 0 CONFIG
+	GIT_TAG v0.2.3
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(MyDesigns)
 FetchContent_Declare(
 	account
 	GIT_REPOSITORY https://github.com/EddyTheCo/account.git
-	GIT_TAG v0.2.1
-	FIND_PACKAGE_ARGS 0 CONFIG
+	GIT_TAG v0.2.2
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(account)
 FetchContent_Declare(
 	nodeConection
 	GIT_REPOSITORY https://github.com/EddyTheCo/ConectionSettings.git
-	GIT_TAG v0.2.2
-	FIND_PACKAGE_ARGS 0 CONFIG
+	GIT_TAG v0.2.3
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(nodeConection)
 
@@ -75,7 +75,7 @@ FetchContent_Declare(
 	booking_model
 	GIT_REPOSITORY https://github.com/EddyTheCo/Booking_model.git
 	GIT_TAG v0.1.2
-	FIND_PACKAGE_ARGS 0 CONFIG
+	FIND_PACKAGE_ARGS 0.1 CONFIG
 	)
 FetchContent_MakeAvailable(booking_model)
 
@@ -128,12 +128,11 @@ qt_add_resources(server_main "server_main.fonts"
 	)
 
 
-target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns)
+target_link_libraries(server_main PRIVATE booking_model nodeConection account qrCode::QtQrGen MyDesigns)
 target_link_libraries(server_main PRIVATE Qt::Core Qt::Gui Qt::Qml Qt::Quick)
 
 
-target_include_directories(server_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/DLockers>)
+target_include_directories(server_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 set_target_properties(server_main PROPERTIES
 	WIN32_EXECUTABLE ON
@@ -153,9 +152,6 @@ if(QTDEPLOY)
 install(SCRIPT ${deploy_script})
 endif(QTDEPLOY)
 
-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/DLockers
-	)
 if(EMSCRIPTEN)
 	prepare_wasm_folder()
 	add_custom_command(
