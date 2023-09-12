@@ -74,7 +74,7 @@ FetchContent_MakeAvailable(nodeConection)
 FetchContent_Declare(
 	booking_model
 	GIT_REPOSITORY https://github.com/EddyTheCo/Booking_model.git
-	GIT_TAG v0.1.2
+        GIT_TAG v0.1.3
 	FIND_PACKAGE_ARGS 0.1 CONFIG
 	)
 FetchContent_MakeAvailable(booking_model)
