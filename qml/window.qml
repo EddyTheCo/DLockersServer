@@ -20,10 +20,10 @@ ApplicationWindow {
     }
     Component.onCompleted:
     {
-
+        if(LocalConf.seed) Account.seed=LocalConf.seed;
         if(LocalConf.nodeaddr) Node_Conection.nodeaddr=LocalConf.nodeaddr;
         if(LocalConf.jwt) Node_Conection.jwt=LocalConf.jwt;
-        if(LocalConf.seed) Account.seed=LocalConf.seed;
+
         CustomStyle.h1=Qt.font({
                                    family: webFont.font.family,
                                    weight: webFont.font.weight,
