@@ -5,7 +5,7 @@
 #include <QtQml/qqmlregistration.h>
 #include<booking.hpp>
 #include<account.hpp>
-#include"nodeConnection.hpp"
+#include<nodeConnection.hpp>
 #include<set>
 #include <queue>
 
@@ -17,6 +17,7 @@ class Book_Server : public QObject
     Q_PROPERTY(QJsonObject  funds READ funds  NOTIFY fundsChanged)
     Q_PROPERTY(QJsonObject  minfunds READ minfunds  NOTIFY minfundsChanged)
     Q_PROPERTY(bool  open READ is_open WRITE setOpen NOTIFY openChanged)
+    Q_PROPERTY(bool rpi_server MEMBER m_rpi_server CONSTANT)
     Q_PROPERTY(QString  serverId READ serverId NOTIFY serverIdChanged)
     Q_PROPERTY(ConState  state READ state NOTIFY stateChanged)
     Q_PROPERTY(QJsonArray  payments READ payments NOTIFY paymentsChange)
@@ -41,7 +42,9 @@ public:
     void deserialize_state(const QByteArray &state);
     auto payments(void)const{return payments_;}
 
-
+#if defined(RPI_SERVER)
+    Q_INVOKABLE void open_rpi_box(void);
+#endif
     Q_INVOKABLE void try_to_open();
     void setOpen(bool op){if(op!=open){open=op;emit openChanged();}}
     bool is_open()const{return open;}
@@ -63,6 +66,7 @@ signals:
     void paymentsChange();
 
 private:
+
     void checkFunds(std::vector<qiota::Node_output>  outs);
     void setFunds(quint64 funds_m);
     void setminFunds(quint64 funds_m);
@@ -88,6 +92,7 @@ private:
     QJsonArray payments_;
     quint64 funds_;
     QHash<QString,quint64> total_funds;
+    bool m_rpi_server;
 };
 
 
