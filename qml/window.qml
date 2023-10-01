@@ -6,6 +6,8 @@ import account
 import server
 import booking_model
 import MyDesigns
+import OMQml
+import QtQrGen
 
 ApplicationWindow {
     id:window
@@ -105,7 +107,7 @@ ApplicationWindow {
                 ColumnLayout
                 {
                     anchors.fill:parent
-                    TextAddress
+                    QrLabel
                     {
                         visible:Node_Conection.state
                         description:qsTr("<b>Server id</b>")
@@ -202,34 +204,52 @@ ApplicationWindow {
             }
         }
 
-
-        Day_swipe_view {
-            id: dayview
-            Layout.fillWidth: true
-            Layout.fillHeight:  true
-            Layout.minimumWidth: 300
-            Layout.maximumWidth: 700
-            Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
-            clip:true
-            can_book:false
-            Layout.leftMargin: seetbutt.width
-            Layout.rightMargin: seetbutt.width
-            visible:head.init
-        }
-        Enter_Pin_server
+        GridLayout
         {
-            visible:!head.init
+            id:grid
             Layout.fillWidth: true
             Layout.fillHeight:  true
-            Layout.minimumWidth: 300
-            Layout.maximumWidth: 700
-            Layout.alignment: Qt.AlignTop|Qt.AlignHCenter
-            Layout.leftMargin: seetbutt.width
-            Layout.rightMargin: seetbutt.width
+            Layout.alignment: Qt.AlignCenter
+            columns: window.width > 500 ? 2 : 1
+            rows : window.width > 500 ? 1 : 2
+
+            Day_swipe_view {
+                id: dayview
+                Layout.fillWidth: true
+                Layout.fillHeight:  true
+                Layout.minimumWidth: 300
+                Layout.maximumWidth: 500
+                Layout.alignment: Qt.AlignCenter
+                clip:true
+                can_book:false
+                visible:head.init
+            }
+
+            Enter_Pin_server
+            {
+                visible:!head.init
+                Layout.fillWidth: true
+                Layout.fillHeight:  true
+                Layout.minimumWidth: 300
+                Layout.maximumWidth: 500
+                Layout.alignment: Qt.AlignCenter
+                Layout.leftMargin: seetbutt.width
+                Layout.rightMargin: seetbutt.width
+            }
+            CurrentWeather
+            {
+                Layout.fillWidth: true
+                Layout.fillHeight:  true
+                Layout.minimumWidth: 150
+                Layout.minimumHeight: 150
+                Layout.maximumWidth: 300
+                Layout.maximumHeight: width
+                Layout.alignment: (grid.columns===1)?(Qt.AlignBottom|Qt.AlignHCenter):(Qt.AlignVCenter|Qt.AlignHCenter)
+                latitude:41.902916
+                longitude:12.453389
+                frontColor:"lightgray"
+            }
         }
-
-
-
     }
 
     MySettButton

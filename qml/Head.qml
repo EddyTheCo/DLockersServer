@@ -5,7 +5,7 @@ import QtQuick.Controls
 import MyDesigns
 import nodeConection
 import account
-
+import QtQrGen
 
 
 ColumnLayout
@@ -14,7 +14,7 @@ ColumnLayout
 
     property alias  butt:button
     property bool init:true
-    MyPayPopUp
+    PayQrPop
     {
         id:serverid
         address: ""
@@ -35,7 +35,7 @@ ColumnLayout
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignCenter
     }
-    TextAddress
+    QrLabel
     {
         visible:Node_Conection.state
         description:qsTr("<b>Server id</b>")
