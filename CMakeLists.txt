@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-if(NODE_JWT)
-    file(WRITE qml/LocalConf.qml "pragma Singleton \n import QtQuick 2.15 \n QtObject { \n property string nodeaddr:\"https://3216aae.online-server.cloud\" \n property string jwt:\"${NODE_JWT}\"\n }" )
-endif(NODE_JWT)
-
 include(local_conf.cmake OPTIONAL)
 
 include(FetchContent)
@@ -44,43 +40,69 @@ qt_standard_project_setup()
 FetchContent_Declare(
 	qrCode
 	GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
-	GIT_TAG v0.0.1
-	FIND_PACKAGE_ARGS 0 CONFIG
+        GIT_TAG v0.2.1
+        FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(qrCode)
+FetchContent_Declare(
+        OMQml
+        GIT_REPOSITORY https://github.com/EddyTheCo/OMClient.git
+        GIT_TAG v0.0.2 
+        FIND_PACKAGE_ARGS 0.0 CONFIG
+    )
+FetchContent_MakeAvailable(OMQml)
 
 FetchContent_Declare(
 	MyDesigns
 	GIT_REPOSITORY https://github.com/EddyTheCo/MyDesigns.git
-	GIT_TAG v0.2.2
-	FIND_PACKAGE_ARGS 0 CONFIG
+	GIT_TAG v0.2.3
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(MyDesigns)
 FetchContent_Declare(
 	account
 	GIT_REPOSITORY https://github.com/EddyTheCo/account.git
-	GIT_TAG v0.2.1
-	FIND_PACKAGE_ARGS 0 CONFIG
+	GIT_TAG v0.2.2
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(account)
 FetchContent_Declare(
 	nodeConection
 	GIT_REPOSITORY https://github.com/EddyTheCo/ConectionSettings.git
-	GIT_TAG v0.2.2
-	FIND_PACKAGE_ARGS 0 CONFIG
+	GIT_TAG v0.2.3
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(nodeConection)
 
 FetchContent_Declare(
 	booking_model
 	GIT_REPOSITORY https://github.com/EddyTheCo/Booking_model.git
-	GIT_TAG v0.1.1
-	FIND_PACKAGE_ARGS 0 CONFIG
+        GIT_TAG v0.1.3
+	FIND_PACKAGE_ARGS 0.1 CONFIG
 	)
 FetchContent_MakeAvailable(booking_model)
 
 
 qt_add_executable(server_main server_main.cpp)
+
+if(RPI_SERVER)
+    FetchContent_Declare(
+            lgpio
+            GIT_REPOSITORY https://github.com/EddyTheCo/lg.git
+            GIT_TAG v0.0.1
+            FIND_PACKAGE_ARGS 0 CONFIG
+            )
+    FetchContent_MakeAvailable(lgpio)
+    target_link_libraries(server_main PRIVATE lgpio)
+    target_compile_definitions(server_main PRIVATE RPI_SERVER)
+
+        if(RPI_SERVER_GPIO)
+            target_compile_definitions(server_main PRIVATE GPIO_NUMBER=${RPI_SERVER_GPIO})
+        else()
+            target_compile_definitions(server_main PRIVATE GPIO_NUMBER=17)
+        endif()
+
+endif(RPI_SERVER)
 
 set_source_files_properties(qml/LocalConf.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
@@ -98,7 +120,7 @@ qt6_add_qml_module(server_main
 	qml/LocalConf.qml
 	RESOURCE_PREFIX
 	"/esterVtech.com/imports"
-	IMPORTS MyDesigns nodeConection account booking_model
+        IMPORTS MyDesigns nodeConection account booking_model OMQml
 	IMPORT_PATH ${QML_IMPORT_PATH}
 	)
 
@@ -109,12 +131,11 @@ qt_add_resources(server_main "server_main.fonts"
 	)
 
 
-target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns)
+target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns OMQml)
 target_link_libraries(server_main PRIVATE Qt::Core Qt::Gui Qt::Qml Qt::Quick)
 
 
-target_include_directories(server_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/DLockers>)
+target_include_directories(server_main PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 set_target_properties(server_main PROPERTIES
 	WIN32_EXECUTABLE ON
@@ -134,9 +155,6 @@ if(QTDEPLOY)
 install(SCRIPT ${deploy_script})
 endif(QTDEPLOY)
 
-install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/include/
-	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/DLockers
-	)
 if(EMSCRIPTEN)
 	prepare_wasm_folder()
 	add_custom_command(

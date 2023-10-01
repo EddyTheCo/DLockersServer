@@ -3,7 +3,7 @@ import QtQuick 2.0
 import QtQuick.Layouts
 import QtQuick.Controls
 import MyDesigns
-
+import QtQrGen
 
 
 ColumnLayout
@@ -27,7 +27,7 @@ ColumnLayout
         fontSizeMode:Text.Fit
         Layout.alignment: Qt.AlignTop
     }
-    TextAddress
+    QrLabel
     {
         id:nftaddr
         Layout.fillWidth: true
@@ -47,7 +47,7 @@ ColumnLayout
         Layout.minimumHeight: 50
         Layout.maximumHeight: 200
         radius:Math.min(width,height)*0.07
-        Layout.alignment: Qt.AlignHCenter|Qt.AlignBottom
+        Layout.alignment: Qt.AlignCenter
         Layout.margins: 30
         MyLabel
         {
