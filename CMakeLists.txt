@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-if(NODE_JWT)
-    file(WRITE qml/LocalConf.qml "pragma Singleton \n import QtQuick 2.15 \n QtObject { \n property string nodeaddr:\"https://3216aae.online-server.cloud\" \n property string jwt:\"${NODE_JWT}\"\n }" )
-endif(NODE_JWT)
-
 include(local_conf.cmake OPTIONAL)
 
 include(FetchContent)
@@ -44,10 +40,17 @@ qt_standard_project_setup()
 FetchContent_Declare(
 	qrCode
 	GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
-	GIT_TAG v0.0.2
-	FIND_PACKAGE_ARGS 0.0 CONFIG
+        GIT_TAG v0.2.1
+        FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(qrCode)
+FetchContent_Declare(
+        OMQml
+        GIT_REPOSITORY https://github.com/EddyTheCo/OMClient.git
+        GIT_TAG v0.0.2 
+        FIND_PACKAGE_ARGS 0.0 CONFIG
+    )
+FetchContent_MakeAvailable(OMQml)
 
 FetchContent_Declare(
 	MyDesigns
@@ -117,7 +120,7 @@ qt6_add_qml_module(server_main
 	qml/LocalConf.qml
 	RESOURCE_PREFIX
 	"/esterVtech.com/imports"
-	IMPORTS MyDesigns nodeConection account booking_model
+        IMPORTS MyDesigns nodeConection account booking_model OMQml
 	IMPORT_PATH ${QML_IMPORT_PATH}
 	)
 
@@ -128,7 +131,7 @@ qt_add_resources(server_main "server_main.fonts"
 	)
 
 
-target_link_libraries(server_main PRIVATE booking_model nodeConection account qrCode::QtQrGen MyDesigns)
+target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns OMQml)
 target_link_libraries(server_main PRIVATE Qt::Core Qt::Gui Qt::Qml Qt::Quick)
 
 
