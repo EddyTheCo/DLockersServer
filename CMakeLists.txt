@@ -40,16 +40,16 @@ qt_standard_project_setup()
 FetchContent_Declare(
 	qrCode
 	GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
-        GIT_TAG v0.2.1
-        FIND_PACKAGE_ARGS 0.2 CONFIG
+	GIT_TAG v0.2.1
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(qrCode)
 FetchContent_Declare(
-        OMQml
-        GIT_REPOSITORY https://github.com/EddyTheCo/OMClient.git
-        GIT_TAG v0.0.2 
-        FIND_PACKAGE_ARGS 0.0 CONFIG
-    )
+	OMQml
+	GIT_REPOSITORY https://github.com/EddyTheCo/OMClient.git
+	GIT_TAG develop
+	FIND_PACKAGE_ARGS 0.0 CONFIG
+	)
 FetchContent_MakeAvailable(OMQml)
 
 FetchContent_Declare(
@@ -77,7 +77,7 @@ FetchContent_MakeAvailable(nodeConection)
 FetchContent_Declare(
 	booking_model
 	GIT_REPOSITORY https://github.com/EddyTheCo/Booking_model.git
-        GIT_TAG v0.1.3
+	GIT_TAG v0.1.3
 	FIND_PACKAGE_ARGS 0.1 CONFIG
 	)
 FetchContent_MakeAvailable(booking_model)
@@ -86,27 +86,27 @@ FetchContent_MakeAvailable(booking_model)
 qt_add_executable(server_main server_main.cpp)
 
 if(RPI_SERVER)
-    FetchContent_Declare(
-            lgpio
-            GIT_REPOSITORY https://github.com/EddyTheCo/lg.git
-            GIT_TAG v0.0.1
-            FIND_PACKAGE_ARGS 0 CONFIG
-            )
-    FetchContent_MakeAvailable(lgpio)
-    target_link_libraries(server_main PRIVATE lgpio)
-    target_compile_definitions(server_main PRIVATE RPI_SERVER)
+	FetchContent_Declare(
+		lgpio
+		GIT_REPOSITORY https://github.com/EddyTheCo/lg.git
+		GIT_TAG v0.0.1
+		FIND_PACKAGE_ARGS 0 CONFIG
+		)
+	FetchContent_MakeAvailable(lgpio)
+	target_link_libraries(server_main PRIVATE lgpio)
+	target_compile_definitions(server_main PRIVATE RPI_SERVER)
 
-        if(RPI_SERVER_GPIO)
-            target_compile_definitions(server_main PRIVATE GPIO_NUMBER=${RPI_SERVER_GPIO})
-        else()
-            target_compile_definitions(server_main PRIVATE GPIO_NUMBER=17)
-        endif()
+	if(RPI_SERVER_GPIO)
+		target_compile_definitions(server_main PRIVATE GPIO_NUMBER=${RPI_SERVER_GPIO})
+	else()
+		target_compile_definitions(server_main PRIVATE GPIO_NUMBER=17)
+	endif()
 
 endif(RPI_SERVER)
 
 set_source_files_properties(qml/LocalConf.qml PROPERTIES
-    QT_QML_SINGLETON_TYPE TRUE
-)
+	QT_QML_SINGLETON_TYPE TRUE
+	)
 
 qt6_add_qml_module(server_main
 	URI server
@@ -120,18 +120,15 @@ qt6_add_qml_module(server_main
 	qml/LocalConf.qml
 	RESOURCE_PREFIX
 	"/esterVtech.com/imports"
-        IMPORTS MyDesigns nodeConection account booking_model OMQml
-	IMPORT_PATH ${QML_IMPORT_PATH}
-	)
-
-qt_add_resources(server_main "server_main.fonts"
-	PREFIX "/esterVtech.com/imports/server"
-	FILES
+	RESOURCES
 	"qml/fonts/DeliciousHandrawn-Regular.ttf"
+	IMPORTS MyDesigns nodeConection account booking_model
+	IMPORT_PATH ${CMAKE_BINARY_DIR}
 	)
 
-
-target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns OMQml)
+target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns OMQml
+	$<$<STREQUAL:$<TARGET_PROPERTY:OMQml,TYPE>,STATIC_LIBRARY>:OMQmlplugin>
+	)
 target_link_libraries(server_main PRIVATE Qt::Core Qt::Gui Qt::Qml Qt::Quick)
 
 
@@ -144,15 +141,15 @@ set_target_properties(server_main PROPERTIES
 
 
 install(TARGETS server_main
-       BUNDLE  DESTINATION .
+	BUNDLE  DESTINATION .
 	DESTINATION ${CMAKE_INSTALL_BINDIR}
 	)
 if(QTDEPLOY)
-    qt_generate_deploy_qml_app_script(
-        TARGET server_main
-        OUTPUT_SCRIPT deploy_script
-    )
-install(SCRIPT ${deploy_script})
+	qt_generate_deploy_qml_app_script(
+		TARGET server_main
+		OUTPUT_SCRIPT deploy_script
+		)
+	install(SCRIPT ${deploy_script})
 endif(QTDEPLOY)
 
 if(EMSCRIPTEN)
@@ -166,11 +163,11 @@ if(EMSCRIPTEN)
 endif()
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    set(CPACK_PACKAGE_CONTACT "estervtech")
-set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-v${SEMVER}-${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_CXX_COMPILER_ID}")
+	set(CPACK_PACKAGE_CONTACT "estervtech")
+	set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-v${SEMVER}-${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_VERSION}-${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_CXX_COMPILER_ID}")
 
-if(USE_THREADS)
-	set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-MThread")
-endif(USE_THREADS)
-include(CPack)
+	if(USE_THREADS)
+		set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-MThread")
+	endif(USE_THREADS)
+	include(CPack)
 endif()
