@@ -1,14 +1,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include "Qrimageprovider.hpp"
-#include "mydesigns.hpp"
 
 
 int main(int argc, char *argv[])
 {
-	auto foo=fooDesign::fooPrint(); //https://forum.qt.io/post/762513
-	foo=fooQtQrGen::fooPrint();
-
 	QGuiApplication app(argc, argv);
 
 	QQmlApplicationEngine engine;

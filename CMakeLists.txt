@@ -40,45 +40,45 @@ qt_standard_project_setup()
 FetchContent_Declare(
 	qrCode
 	GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
-	GIT_TAG v0.2.1
-	FIND_PACKAGE_ARGS 0.2 CONFIG
+	GIT_TAG v0.3.1
+	FIND_PACKAGE_ARGS 0.3 CONFIG
 	)
 FetchContent_MakeAvailable(qrCode)
 FetchContent_Declare(
 	OMQml
 	GIT_REPOSITORY https://github.com/EddyTheCo/OMClient.git
-	GIT_TAG develop
-	FIND_PACKAGE_ARGS 0.0 CONFIG
+	GIT_TAG v0.1.1
+	FIND_PACKAGE_ARGS 0.1 CONFIG
 	)
 FetchContent_MakeAvailable(OMQml)
 
 FetchContent_Declare(
 	MyDesigns
 	GIT_REPOSITORY https://github.com/EddyTheCo/MyDesigns.git
-	GIT_TAG v0.2.3
-	FIND_PACKAGE_ARGS 0.2 CONFIG
+	GIT_TAG v0.3.1
+	FIND_PACKAGE_ARGS 0.3 CONFIG
 	)
 FetchContent_MakeAvailable(MyDesigns)
 FetchContent_Declare(
 	account
 	GIT_REPOSITORY https://github.com/EddyTheCo/account.git
-	GIT_TAG v0.2.2
-	FIND_PACKAGE_ARGS 0.2 CONFIG
+	GIT_TAG v0.4.1
+	FIND_PACKAGE_ARGS 0.4 CONFIG
 	)
 FetchContent_MakeAvailable(account)
 FetchContent_Declare(
 	nodeConection
 	GIT_REPOSITORY https://github.com/EddyTheCo/ConectionSettings.git
-	GIT_TAG v0.2.3
-	FIND_PACKAGE_ARGS 0.2 CONFIG
+	GIT_TAG v0.4.1
+	FIND_PACKAGE_ARGS 0.4 CONFIG
 	)
 FetchContent_MakeAvailable(nodeConection)
 
 FetchContent_Declare(
 	booking_model
 	GIT_REPOSITORY https://github.com/EddyTheCo/Booking_model.git
-	GIT_TAG v0.1.3
-	FIND_PACKAGE_ARGS 0.1 CONFIG
+	GIT_TAG v0.2.1
+	FIND_PACKAGE_ARGS 0.2 CONFIG
 	)
 FetchContent_MakeAvailable(booking_model)
 
@@ -122,12 +122,14 @@ qt6_add_qml_module(server_main
 	"/esterVtech.com/imports"
 	RESOURCES
 	"qml/fonts/DeliciousHandrawn-Regular.ttf"
-	IMPORTS MyDesigns nodeConection account booking_model
 	IMPORT_PATH ${CMAKE_BINARY_DIR}
 	)
 
 target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns OMQml
 	$<$<STREQUAL:$<TARGET_PROPERTY:OMQml,TYPE>,STATIC_LIBRARY>:OMQmlplugin>
+	$<$<STREQUAL:$<TARGET_PROPERTY:MyDesigns,TYPE>,STATIC_LIBRARY>:MyDesignsplugin>
+	$<$<STREQUAL:$<TARGET_PROPERTY:account,TYPE>,STATIC_LIBRARY>:accountplugin>
+	$<$<STREQUAL:$<TARGET_PROPERTY:booking_model,TYPE>,STATIC_LIBRARY>:booking_modelplugin>
 	)
 target_link_libraries(server_main PRIVATE Qt::Core Qt::Gui Qt::Qml Qt::Quick)
 

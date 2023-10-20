@@ -4,12 +4,10 @@
 #include<QString>
 #include <QtQml/qqmlregistration.h>
 #include<booking.hpp>
-#include<account.hpp>
-#include<nodeConnection.hpp>
 #include<set>
 #include <queue>
-
-
+#include "client/qclient.hpp"
+using namespace qiota;
 class Book_Server : public QObject
 {
     Q_OBJECT
@@ -60,7 +58,6 @@ signals:
     void nftAddress(QString);
     void serverIdChanged();
     void notEnought(QJsonObject);
-    void accountChanged();
     void finishRestart();
     void stateChanged();
     void paymentsChange();
