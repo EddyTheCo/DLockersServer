@@ -9,6 +9,10 @@
 #include<nodeConnection.hpp>
 #if defined(RPI_SERVER)
 #include"lgpio.h"
+#include <QGuiApplication>
+#if QT_CONFIG(permissions)
+#include <QPermission>
+#endif
 #endif
 using namespace qiota::qblocks;
 
@@ -76,16 +80,16 @@ void Book_Server::get_restart_state(void)
             node_outputs_->deleteLater();
         });
         Node_Conection::instance()->rest()->get_outputs<Output::Basic_typ>(node_outputs_,"address="+
-                                                                                       Account::instance()->addr_bech32({0,0,0},info->bech32Hrp)+
-                                                                                       "&hasStorageDepositReturn=false&hasTimelock=false&hasExpiration=false&sender="+
-                                                                                       Account::instance()->addr_bech32({0,0,0},info->bech32Hrp)+"&tag="+fl_array<quint8>("state").toHexString());
+                                                                                              Account::instance()->addr_bech32({0,0,0},info->bech32Hrp)+
+                                                                                              "&hasStorageDepositReturn=false&hasTimelock=false&hasExpiration=false&sender="+
+                                                                                              Account::instance()->addr_bech32({0,0,0},info->bech32Hrp)+"&tag="+fl_array<quint8>("state").toHexString());
         auto node_outputs=new Node_outputs();
         connect(node_outputs,&Node_outputs::finished,reciever,[=]( ){
             checkFunds(node_outputs->outs_);
             node_outputs->deleteLater();
         });
         Node_Conection::instance()->rest()->get_outputs<Output::Basic_typ>(node_outputs,"address="+
-                                                                                      Account::instance()->addr_bech32({0,0,0},info->bech32Hrp));
+                                                                                             Account::instance()->addr_bech32({0,0,0},info->bech32Hrp));
 
         info->deleteLater();
     });
@@ -193,16 +197,63 @@ void Book_Server::setminFunds(quint64 funds_m){
 
 }
 Book_Server::Book_Server(QObject *parent):QObject(parent),price_per_hour_(10000),state_(Ready),reciever(nullptr),started(false),
-    open(false),m_rpi_server(
+    open(false)
 #if defined(RPI_SERVER)
-          true
+    ,m_rpi_server(true)
 #else
-          false
+    ,m_rpi_server(false)
 #endif
-          )
-{
-}
 
+{
+#if defined(RPI_SERVER)
+    checkLPermission();
+#endif
+}
+#if defined(RPI_SERVER)
+void Book_Server::checkLPermission(void)
+{
+
+#if QT_CONFIG(permissions)
+
+    QLocationPermission lPermission;
+    lPermission.setAccuracy(QLocationPermission::Precise);
+    switch (qApp->checkPermission(lPermission)) {
+    case Qt::PermissionStatus::Undetermined:
+        qApp->requestPermission(lPermission, this,
+                                &Book_Server::checkLPermission);
+        return;
+    case Qt::PermissionStatus::Denied:
+        return;
+    case Qt::PermissionStatus::Granted:
+        PosSource=(QGeoPositionInfoSource::createSource("nmea", {std::make_pair("nmea.source",SERIAL_PORT_NAME)}, this))?
+                        QGeoPositionInfoSource::createSource("nmea", {std::make_pair("nmea.source",SERIAL_PORT_NAME)}, this):
+                        QGeoPositionInfoSource::createDefaultSource(this);
+        if (PosSource) {
+            PosSource->setUpdateInterval(60000);
+            qDebug()<<"PosSource:"<<PosSource->sourceName();
+            connect(PosSource,&QGeoPositionInfoSource::positionUpdated,
+                    this, [=](const QGeoPositionInfo &update){
+                        m_GeoCoord=update.coordinate();
+                        emit geoCoordChanged();
+                        qDebug()<<"GeoCoord:"<<m_GeoCoord;
+                    });
+            connect(PosSource,&QGeoPositionInfoSource::errorOccurred,
+                    this, [=](QGeoPositionInfoSource::Error _t1){
+                        qDebug()<<"Position Error:"<<_t1;
+                    });
+            PosSource->requestUpdate();
+            PosSource->startUpdates();
+        }
+
+        return;
+    }
+
+#endif
+
+
+
+}
+#endif
 void Book_Server::clean_state(void)
 {
     for(const auto& v: books_)
@@ -530,7 +581,9 @@ QByteArray Book_Server::serialize_state(void)const
     var.insert("bookings",bookings);
     var.insert("price_per_hour",QString::number(price_per_hour_));
     var.insert("pay_to",Account::instance()->addr({0,0,1}));
-
+#if defined(RPI_SERVER)
+    if(m_GeoCoord.isValid())var.insert("coord",QJsonArray({m_GeoCoord.longitude(),m_GeoCoord.latitude()}));
+#endif
     auto state = QJsonDocument(var);
     return state.toJson();
 }

@@ -245,8 +245,8 @@ ApplicationWindow {
                 Layout.maximumWidth: 300
                 Layout.maximumHeight: width
                 Layout.alignment: (grid.columns===1)?(Qt.AlignBottom|Qt.AlignHCenter):(Qt.AlignVCenter|Qt.AlignHCenter)
-                latitude:41.902916
-                longitude:12.453389
+                latitude:(Book_Server.rpi_server)?Book_Server.GeoCoord.latitude:41.902229
+                longitude:(Book_Server.rpi_server)?Book_Server.GeoCoord.longitude:12.458100
                 frontColor:"lightgray"
             }
         }
