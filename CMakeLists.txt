@@ -43,7 +43,7 @@ qt_standard_project_setup()
 FetchContent_Declare(
     qrCode
     GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
-    GIT_TAG v0.3.1
+    GIT_TAG develop
     FIND_PACKAGE_ARGS 0.3 CONFIG
 )
 FetchContent_MakeAvailable(qrCode)
