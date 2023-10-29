@@ -14,6 +14,7 @@
 #include <QPermission>
 #endif
 #endif
+
 using namespace qiota::qblocks;
 
 using namespace qiota;
@@ -212,25 +213,22 @@ Book_Server::Book_Server(QObject *parent):QObject(parent),price_per_hour_(10000)
 #if defined(RPI_SERVER)
 void Book_Server::initGPS(void)
 {
-    PosSource=(QGeoPositionInfoSource::createSource("nmea", {std::make_pair("nmea.source",SERIAL_PORT_NAME)}, this))?
-                    QGeoPositionInfoSource::createSource("nmea", {std::make_pair("nmea.source",SERIAL_PORT_NAME)}, this):
-                    QGeoPositionInfoSource::createDefaultSource(this);
+    PosSource = QGeoPositionInfoSource::createSource("nmea", {std::make_pair("nmea.source",SERIAL_PORT_NAME)}, this);
+    if(!PosSource)PosSource=QGeoPositionInfoSource::createDefaultSource(this);
     if (PosSource) {
         qDebug()<<"PosSource:"<<PosSource->sourceName();
         connect(PosSource,&QGeoPositionInfoSource::positionUpdated,
                 this, [=](const QGeoPositionInfo &update){
                     m_GeoCoord=update.coordinate();
                     emit geoCoordChanged();
-                    qDebug()<<"GeoCoord:"<<m_GeoCoord;
                 });
         connect(PosSource,&QGeoPositionInfoSource::errorOccurred,
                 this, [=](QGeoPositionInfoSource::Error _t1){
                     qDebug()<<"Position Error:"<<_t1;
                 });
-        qDebug()<<"GeoCoord1:"<<m_GeoCoord;
+        PosSource->setUpdateInterval(30000);
         PosSource->requestUpdate();
         PosSource->startUpdates();
-        qDebug()<<"GeoCoord2:"<<m_GeoCoord;
     }
 }
 void Book_Server::checkLPermission(void)
