@@ -101,8 +101,10 @@ private:
 
 #if defined(RPI_SERVER)
     void checkLPermission();
+    void initGPS();
     QGeoPositionInfoSource *PosSource;
     QGeoCoordinate m_GeoCoord;
+
 #endif
 
 };
