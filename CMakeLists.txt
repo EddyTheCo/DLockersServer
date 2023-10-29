@@ -46,6 +46,7 @@ FetchContent_Declare(
     GIT_TAG develop
     FIND_PACKAGE_ARGS 0.3 CONFIG
 )
+set(OpenCV_DOWNLOAD OFF)
 FetchContent_MakeAvailable(qrCode)
 FetchContent_Declare(
     OMQml

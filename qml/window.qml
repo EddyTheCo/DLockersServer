@@ -72,6 +72,15 @@ ApplicationWindow {
             noti.show({"message":"Not enough funds\n "+ "lack of "+ amount.largeValue.value + " "+ amount.largeValue.unit });
         }
     }
+    CloseButton
+    {
+        width:50
+        height:50
+        x:100
+        y:100
+        onClicked: Qt.exit(0)
+        visible: Book_Server.rpi_server
+    }
 
     Drawer {
         id:settings
@@ -236,7 +245,7 @@ ApplicationWindow {
                 Layout.leftMargin: seetbutt.width
                 Layout.rightMargin: seetbutt.width
             }
-            /*CurrentWeather
+            CurrentWeather
             {
                 Layout.fillWidth: true
                 Layout.fillHeight:  true
@@ -248,7 +257,7 @@ ApplicationWindow {
                 latitude:(Book_Server.rpi_server)?Book_Server.GeoCoord.latitude:41.902229
                 longitude:(Book_Server.rpi_server)?Book_Server.GeoCoord.longitude:12.458100
                 frontColor:"lightgray"
-            }*/
+            }
         }
     }
 

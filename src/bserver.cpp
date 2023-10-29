@@ -216,7 +216,6 @@ void Book_Server::initGPS(void)
                     QGeoPositionInfoSource::createSource("nmea", {std::make_pair("nmea.source",SERIAL_PORT_NAME)}, this):
                     QGeoPositionInfoSource::createDefaultSource(this);
     if (PosSource) {
-        PosSource->setUpdateInterval(60000);
         qDebug()<<"PosSource:"<<PosSource->sourceName();
         connect(PosSource,&QGeoPositionInfoSource::positionUpdated,
                 this, [=](const QGeoPositionInfo &update){
