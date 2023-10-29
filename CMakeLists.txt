@@ -34,7 +34,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml OPTIONAL_COMPONENTS Positioning)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml  OPTIONAL_COMPONENTS Positioning Serialport)
 
 
 
@@ -88,6 +88,7 @@ FetchContent_MakeAvailable(booking_model)
 
 
 qt_add_executable(server_main server_main.cpp)
+set(RPI_SERVER ON)
 if(RPI_SERVER)
     message(STATUS "Setting build RPI_SERVER")
     FetchContent_Declare(
@@ -99,7 +100,7 @@ if(RPI_SERVER)
 FetchContent_MakeAvailable(lgpio)
 target_link_libraries(server_main PRIVATE lgpio)
 target_compile_definitions(server_main PRIVATE RPI_SERVER
-    SERIAL_PORT_NAME=$<IF:$<BOOL:${RPI_SERIAL_PN}>,${RPI_SERIAL_PN},"/dev/ttyUSB1">
+    SERIAL_PORT_NAME=$<IF:$<BOOL:${RPI_SERIAL_PN}>,${RPI_SERIAL_PN},"serial:/dev/ttyUSB1">
     GPIO_NUMBER=$<IF:$<BOOL:${RPI_SERVER_GPIO}>,${RPI_SERVER_GPIO},17>
 )
 
@@ -112,7 +113,7 @@ if(NOT TARGET Qt6::Positioning)
 FetchContent_MakeAvailable(qtpositioning)
 endif(NOT TARGET Qt6::Positioning)
 
-target_link_libraries(server_main PRIVATE Qt6::Positioning)
+target_link_libraries(server_main PRIVATE Qt6::Positioning )
 
 endif(RPI_SERVER)
 
