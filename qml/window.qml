@@ -128,7 +128,6 @@ ApplicationWindow {
                         Layout.fillHeight: true
                         Layout.minimumHeight: 30
                         Layout.margins: 5
-
                     }
                     Text
                     {
@@ -141,7 +140,6 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignCenter
                         Layout.fillHeight: true
-
                     }
                     AmountText
                     {
@@ -158,7 +156,7 @@ ApplicationWindow {
                     {
                         visible:Number(Book_Server.funds.largeValue.value)<Number(Book_Server.minfunds.largeValue.value)
                         font: webFont.font
-                        text: "Transfer at least:" + (Number(Book_Server.minfunds.largeValue.value)-Number(Book_Server.funds.largeValue.value)) + '<font color=\"'+CustomStyle.frontColor2+'\">'+Book_Server.minfunds.largeValue.unit+'</font>'
+                        text: qsTr("Transfer at least:") + (Number(Book_Server.minfunds.largeValue.value)-Number(Book_Server.funds.largeValue.value)) + '<font color=\"'+CustomStyle.frontColor2+'\">'+Book_Server.minfunds.largeValue.unit+'</font>'
                         horizontalAlignment:Text.AlignHCenter
                         color: CustomStyle.frontColor1
                         fontSizeMode:Text.Fit
@@ -201,7 +199,7 @@ ApplicationWindow {
             Layout.minimumWidth: 300
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            butt.text:(init)?"Open box":"back"
+            butt.text:qsTr((init)?"Open box":"back")
             butt.enabled:Node_Conection.state
 
             butt.onClicked:
