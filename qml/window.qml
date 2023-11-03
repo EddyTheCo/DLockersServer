@@ -89,7 +89,7 @@ ApplicationWindow {
         height:parent.height
         focus:true
         modal:true
-        interactive: !Book_Server.rpi_server
+        //interactive: !Book_Server.rpi_server
 
         background: Rectangle
         {
@@ -271,7 +271,7 @@ ApplicationWindow {
             settings.open()
         }
         animate: settings.position>0.1
-        visible: !Book_Server.rpi_server
+        //visible: !Book_Server.rpi_server
     }
 
 }

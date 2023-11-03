@@ -200,7 +200,7 @@ void Book_Server::setminFunds(quint64 funds_m){
 Book_Server::Book_Server(QObject *parent):QObject(parent),price_per_hour_(10000),state_(Ready),reciever(nullptr),started(false),
     open(false)
 #if defined(RPI_SERVER)
-    ,m_rpi_server(true)
+    ,m_rpi_server(true),m_GeoCoord(41.902229,12.458100)
 #else
     ,m_rpi_server(false)
 #endif
