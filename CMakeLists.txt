@@ -37,8 +37,6 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml  OPTIONAL_COMPONENTS Positioning Serialport)
 
 
-
-
 qt_standard_project_setup()
 FetchContent_Declare(
     qrCode
@@ -51,7 +49,7 @@ FetchContent_MakeAvailable(qrCode)
 FetchContent_Declare(
     OMQml
     GIT_REPOSITORY https://github.com/EddyTheCo/OMClient.git
-    GIT_TAG develop
+    GIT_TAG fixes
     FIND_PACKAGE_ARGS 0.1 CONFIG
 )
 FetchContent_MakeAvailable(OMQml)
@@ -139,6 +137,7 @@ qt6_add_qml_module(server_main
 )
 
 target_link_libraries(server_main PRIVATE booking_model nodeConection account QtQrGen MyDesigns OMQml
+    $<$<STREQUAL:$<TARGET_PROPERTY:QtQrGen,TYPE>,STATIC_LIBRARY>:QtQrGenplugin>
     $<$<STREQUAL:$<TARGET_PROPERTY:OMQml,TYPE>,STATIC_LIBRARY>:OMQmlplugin>
     $<$<STREQUAL:$<TARGET_PROPERTY:MyDesigns,TYPE>,STATIC_LIBRARY>:MyDesignsplugin>
     $<$<STREQUAL:$<TARGET_PROPERTY:account,TYPE>,STATIC_LIBRARY>:accountplugin>
