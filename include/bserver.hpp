@@ -4,12 +4,15 @@
 #include<QString>
 #include <QtQml/qqmlregistration.h>
 #include<booking.hpp>
-#include<account.hpp>
-#include<nodeConnection.hpp>
 #include<set>
 #include <queue>
+#include "client/qclient.hpp"
 
+#if defined(RPI_SERVER)
+#include <QGeoPositionInfoSource>
+#endif
 
+using namespace qiota;
 class Book_Server : public QObject
 {
     Q_OBJECT
@@ -21,7 +24,9 @@ class Book_Server : public QObject
     Q_PROPERTY(QString  serverId READ serverId NOTIFY serverIdChanged)
     Q_PROPERTY(ConState  state READ state NOTIFY stateChanged)
     Q_PROPERTY(QJsonArray  payments READ payments NOTIFY paymentsChange)
-
+#if defined(RPI_SERVER)
+    Q_PROPERTY(QGeoCoordinate  GeoCoord MEMBER m_GeoCoord NOTIFY geoCoordChanged)
+#endif
     QML_ELEMENT
     QML_SINGLETON
 
@@ -60,10 +65,10 @@ signals:
     void nftAddress(QString);
     void serverIdChanged();
     void notEnought(QJsonObject);
-    void accountChanged();
     void finishRestart();
     void stateChanged();
     void paymentsChange();
+    void geoCoordChanged();
 
 private:
 
@@ -93,6 +98,15 @@ private:
     quint64 funds_;
     QHash<QString,quint64> total_funds;
     bool m_rpi_server;
+
+#if defined(RPI_SERVER)
+    void checkLPermission();
+    void initGPS();
+    QGeoPositionInfoSource *PosSource;
+    QGeoCoordinate m_GeoCoord;
+
+#endif
+
 };
 
 

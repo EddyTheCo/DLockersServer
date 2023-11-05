@@ -31,7 +31,7 @@ ColumnLayout
     {
         id:nftaddr
         Layout.fillWidth: true
-        description:"address"
+        description:qsTr("address")
         address:""
         Layout.alignment: Qt.AlignTop
         Layout.bottomMargin: 10
@@ -54,7 +54,7 @@ ColumnLayout
             anchors.centerIn: parent
             width: parent.width*0.85
             height:parent.height
-            text:qsTr("The box is " + (Book_Server.open?"open":"closed"))
+            text:qsTr("The box is %1").arg(Book_Server.open?"open":"closed")
             font:CustomStyle.h1
             color:(Book_Server.open)?CustomStyle.frontColor1:CustomStyle.midColor1
             horizontalAlignment:Text.AlignHCenter
