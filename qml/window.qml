@@ -72,15 +72,7 @@ ApplicationWindow {
             noti.show({"message":"Not enough funds\n "+ "lack of "+ amount.largeValue.value + " "+ amount.largeValue.unit });
         }
     }
-    CloseButton
-    {
-        width:50
-        height:50
-        x:100
-        y:100
-        onClicked: Qt.exit(0)
-        visible: Book_Server.rpi_server
-    }
+
 
     Drawer {
         id:settings
@@ -89,7 +81,7 @@ ApplicationWindow {
         height:parent.height
         focus:true
         modal:true
-        //interactive: !Book_Server.rpi_server
+        interactive: !Book_Server.rpi_server
 
         background: Rectangle
         {
@@ -271,8 +263,16 @@ ApplicationWindow {
             settings.open()
         }
         animate: settings.position>0.1
-        //visible: !Book_Server.rpi_server
+        visible: !Book_Server.rpi_server
     }
-
+    CloseButton
+    {
+        width:50
+        height:50
+        anchors.top: parent.top
+        anchors.right: parent.right
+        onClicked: Qt.exit(0)
+        visible: Book_Server.rpi_server
+    }
 }
 

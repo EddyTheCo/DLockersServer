@@ -39,28 +39,28 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml  OPTIONAL_COMPONENTS Pos
 
 qt_standard_project_setup()
 FetchContent_Declare(
+    MyDesigns
+    GIT_REPOSITORY https://github.com/EddyTheCo/MyDesigns.git
+    GIT_TAG v0.4.1
+    FIND_PACKAGE_ARGS 0.4 CONFIG
+)
+FetchContent_MakeAvailable(MyDesigns)
+FetchContent_Declare(
     qrCode
     GIT_REPOSITORY https://github.com/EddyTheCo/qrCode.git
-    GIT_TAG develop
-    FIND_PACKAGE_ARGS 0.3 CONFIG
+    GIT_TAG v0.4.1
+    FIND_PACKAGE_ARGS 0.4 CONFIG
 )
 set(OpenCV_DOWNLOAD OFF)
 FetchContent_MakeAvailable(qrCode)
 FetchContent_Declare(
     OMQml
     GIT_REPOSITORY https://github.com/EddyTheCo/OMClient.git
-    GIT_TAG fixes
+    GIT_TAG v0.1.2
     FIND_PACKAGE_ARGS 0.1 CONFIG
 )
 FetchContent_MakeAvailable(OMQml)
 
-FetchContent_Declare(
-    MyDesigns
-    GIT_REPOSITORY https://github.com/EddyTheCo/MyDesigns.git
-    GIT_TAG v0.3.1
-    FIND_PACKAGE_ARGS 0.3 CONFIG
-)
-FetchContent_MakeAvailable(MyDesigns)
 FetchContent_Declare(
     account
     GIT_REPOSITORY https://github.com/EddyTheCo/account.git
@@ -86,8 +86,7 @@ FetchContent_MakeAvailable(booking_model)
 
 
 qt_add_executable(server_main server_main.cpp)
-set(RPI_SERVER ON)
-if(RPI_SERVER)
+if(RPI_SERVER AND NOT EMSCRIPTEN)
     message(STATUS "Setting build RPI_SERVER")
     FetchContent_Declare(
         lgpio
@@ -113,7 +112,7 @@ endif(NOT TARGET Qt6::Positioning)
 
 target_link_libraries(server_main PRIVATE Qt6::Positioning )
 
-endif(RPI_SERVER)
+endif(RPI_SERVER AND NOT EMSCRIPTEN)
 
 set_source_files_properties(qml/LocalConf.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
