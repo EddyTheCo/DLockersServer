@@ -73,6 +73,7 @@ ApplicationWindow {
         }
     }
 
+
     Drawer {
         id:settings
         width:300
@@ -119,7 +120,6 @@ ApplicationWindow {
                         Layout.fillHeight: true
                         Layout.minimumHeight: 30
                         Layout.margins: 5
-
                     }
                     Text
                     {
@@ -132,7 +132,6 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignCenter
                         Layout.fillHeight: true
-
                     }
                     AmountText
                     {
@@ -149,7 +148,7 @@ ApplicationWindow {
                     {
                         visible:Number(Book_Server.funds.largeValue.value)<Number(Book_Server.minfunds.largeValue.value)
                         font: webFont.font
-                        text: "Transfer at least:" + (Number(Book_Server.minfunds.largeValue.value)-Number(Book_Server.funds.largeValue.value)) + '<font color=\"'+CustomStyle.frontColor2+'\">'+Book_Server.minfunds.largeValue.unit+'</font>'
+                        text: qsTr("Transfer at least:") + (Number(Book_Server.minfunds.largeValue.value)-Number(Book_Server.funds.largeValue.value)) + '<font color=\"'+CustomStyle.frontColor2+'\">'+Book_Server.minfunds.largeValue.unit+'</font>'
                         horizontalAlignment:Text.AlignHCenter
                         color: CustomStyle.frontColor1
                         fontSizeMode:Text.Fit
@@ -192,7 +191,7 @@ ApplicationWindow {
             Layout.minimumWidth: 300
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignTop
-            butt.text:(init)?"Open box":"back"
+            butt.text:qsTr((init)?"Open box":"back")
             butt.enabled:Node_Conection.state
 
             butt.onClicked:
@@ -245,8 +244,8 @@ ApplicationWindow {
                 Layout.maximumWidth: 300
                 Layout.maximumHeight: width
                 Layout.alignment: (grid.columns===1)?(Qt.AlignBottom|Qt.AlignHCenter):(Qt.AlignVCenter|Qt.AlignHCenter)
-                latitude:41.902916
-                longitude:12.453389
+                latitude:(Book_Server.rpi_server)?Book_Server.GeoCoord.latitude:41.902229
+                longitude:(Book_Server.rpi_server)?Book_Server.GeoCoord.longitude:12.458100
                 frontColor:"lightgray"
             }
         }
@@ -266,6 +265,14 @@ ApplicationWindow {
         animate: settings.position>0.1
         visible: !Book_Server.rpi_server
     }
-
+    CloseButton
+    {
+        width:50
+        height:50
+        anchors.top: parent.top
+        anchors.right: parent.right
+        onClicked: Qt.exit(0)
+        visible: Book_Server.rpi_server
+    }
 }
 
