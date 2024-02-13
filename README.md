@@ -1,5 +1,6 @@
 # [DLockers  Server](https://eddytheco.github.io/DLockersServer/wasm/)
 
+This repo is now archived, please refer to [Dlockers repo](https://github.com/EddyTheCo/DLockers)
 
 ## Proof of Concept on implementing decentralized applications on the IOTA network.
 
